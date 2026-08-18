@@ -22,6 +22,10 @@ import normalIcon from '../../assets/reflection-page/normal.svg?react'
 import failIcon from '../../assets/reflection-page/fail.svg?react'
 import noneIcon from '../../assets/reflection-page/none.svg?react'
 
+// Ranking Page Icons
+import rankStage from '../../assets/rank-page/rank-stage.svg?react'
+import rankProfile from '../../assets/rank-page/rank-profile.svg?react'
+
 export const iconMap = {
   // Navigation Bar Icons
   'navigation-home-active': navigationHomeActive,
@@ -46,4 +50,8 @@ export const iconMap = {
   'normal-icon': normalIcon,
   'fail-icon': failIcon,
   'none-icon': noneIcon, // 상태가 없는 경우를 위해 추가
+
+  // Ranking Page Icons
+  'rank-stage': rankStage,
+  'rank-profile': rankProfile,
 }
