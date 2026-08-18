@@ -1,5 +1,6 @@
 import MainTitle from '../../components/initial-page-title/MainTitle'
 import SubTitle from '../../components/initial-page-title/SubTitle'
+import Input from './components/input/Input'
 
 function InputInforPage() {
   return (
@@ -11,6 +12,15 @@ function InputInforPage() {
       </MainTitle>
 
       <SubTitle>앞으로 닉네임을 불러드릴게요.</SubTitle>
+
+      <Input id='name' title='이름' placeholder='본명을 입력하세요' />
+
+      <Input
+        id='nickname'
+        title='닉네임'
+        placeholder='8글자 이내의 닉네임을 입력하세요'
+        maxLength={8}
+      />
     </div>
   )
 }
