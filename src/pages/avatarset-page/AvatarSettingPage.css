@@ -266,4 +266,11 @@
 .avatar-setting-page__footer .bottom-button {
   position: relative;
   z-index: 1;
+
+  background-color: #4dc4ff;
+  color: #ffffff;
+  opacity: 1;
+
+  cursor: pointer;
+  pointer-events: auto;
 }
