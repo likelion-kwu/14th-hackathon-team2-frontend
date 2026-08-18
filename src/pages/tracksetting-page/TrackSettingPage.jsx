@@ -1,5 +1,7 @@
 import './TrackSettingPage.css'
 
+import MainTitle from '../../components/initial-page-title/MainTitle'
+import SubTitle from '../../components/initial-page-title/SubTitle'
 import BackButton from '../../components/back-button/BackButton'
 import BottomButton from '../../components/bottom-button/BottomButton'
 
@@ -11,6 +13,8 @@ import skinActiveImage from '../../assets/icons/icons-track/image-skin-active.sv
 import skinDefaultImage from '../../assets/icons/icons-track/image-skin-default.svg'
 import wellbeingActiveImage from '../../assets/icons/icons-track/image-wellbeing-active.svg'
 import wellbeingDefaultImage from '../../assets/icons/icons-track/image-wellbeing-default.svg'
+
+import bottomBarImage from '../../assets/tracksetting-page/image-bottombar3.svg'
 
 const TRACK_LIST = [
   {
@@ -47,39 +51,43 @@ function TrackSettingPage() {
       </div>
 
       <div className='track-setting-page__header'>
-        <h1 className='track-setting-page__title'>
+        <MainTitle>
           어떤 변화를 만들어보고
           <br />
           싶으신가요?
-        </h1>
+        </MainTitle>
 
-        <p className='track-setting-page__description'>트랙을 하나 이상 선택해 주세요</p>
+        <SubTitle>트랙을 하나 이상 선택해 주세요.</SubTitle>
       </div>
 
       <div className='track-setting-page__track-list'>
         {TRACK_LIST.map((track) => (
-          <button key={track.id} className='track-setting-page__track-button' type='button'>
-            <img
-              className='track-setting-page__track-image track-setting-page__track-image--default'
-              src={track.defaultImage}
-              alt={track.label}
+          <label key={track.id} className='track-setting-page__track-option'>
+            <input
+              className='track-setting-page__track-checkbox'
+              type='checkbox'
+              name='track'
+              value={track.id}
             />
 
-            <img
-              className='track-setting-page__track-image track-setting-page__track-image--active'
-              src={track.activeImage}
-              alt=''
-            />
-          </button>
+            <span className='track-setting-page__track-visual'>
+              <img
+                className='track-setting-page__track-image track-setting-page__track-image--default'
+                src={track.defaultImage}
+                alt={track.label}
+              />
+
+              <img
+                className='track-setting-page__track-image track-setting-page__track-image--active'
+                src={track.activeImage}
+                alt=''
+              />
+            </span>
+          </label>
         ))}
       </div>
 
-      <div className='track-setting-page__bottom-bar' aria-hidden='true'>
-        <span />
-        <span className='track-setting-page__bottom-dot--active' />
-        <span />
-        <span />
-      </div>
+      <img className='track-setting-page__bottom-bar' src={bottomBarImage} alt='' />
 
       <BottomButton disabled>다음</BottomButton>
     </div>
