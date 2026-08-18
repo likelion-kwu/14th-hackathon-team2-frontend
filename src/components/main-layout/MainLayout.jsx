@@ -7,7 +7,7 @@ const MainLayout = () => {
     <div className='mainlayout__container'>
       <div className='mainlayout__page'>
         <Outlet />
-        <Navigation />
+        <Navigation className='navigation' />
       </div>
     </div>
   )

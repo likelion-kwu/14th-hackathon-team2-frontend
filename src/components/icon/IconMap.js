@@ -9,6 +9,10 @@ import navigationRankActive from '../../assets/icons/icons-navigation/icons-navi
 import navigationRankDisabled from '../../assets/icons/icons-navigation/icons-navigation-rank-disabled.svg?react'
 import navigationCustomActive from '../../assets/icons/icons-navigation/icons-navigation-custom-active.svg?react'
 import navigationCustomDisabled from '../../assets/icons/icons-navigation/icons-navigation-custom-disabled.svg?react'
+import giftboxBlue from '../../assets/reflection-page/giftbox-blue.svg?react'
+import giftboxGray from '../../assets/reflection-page/giftbox-gray.svg?react'
+import giftboxPink from '../../assets/reflection-page/giftbox-pink.svg?react'
+import giftbar from '../../assets/reflection-page/giftbar.svg?react'
 
 export const iconMap = {
   // Navigation Bar Icons
@@ -22,4 +26,10 @@ export const iconMap = {
   'navigation-rank-disabled': navigationRankDisabled,
   'navigation-custom-active': navigationCustomActive,
   'navigation-custom-disabled': navigationCustomDisabled,
+
+  // Reflection Page Icons
+  'giftbox-blue': giftboxBlue,
+  'giftbox-gray': giftboxGray,
+  'giftbox-pink': giftboxPink,
+  'gift-bar': giftbar,
 }
