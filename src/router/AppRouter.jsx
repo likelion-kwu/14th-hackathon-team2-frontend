@@ -6,7 +6,7 @@ import CustomizePage from '../pages/customize-page/entry/CustomizePage'
 
 export const AppRouter = createBrowserRouter([
   {
-    path: '/onboarding',
+    path: '/',
     element: <div>onboarding</div>,
   },
   {
