@@ -1,5 +1,5 @@
 import './OnboardingPage.css'
-
+import BottomButton from '../../components/bottom-button/BottomButton'
 import onboardingCharacters from '../../assets/onboarding-page/image-character.svg'
 import onboardingBar from '../../assets/onboarding-page/image-bottombar.svg'
 
@@ -21,6 +21,8 @@ function OnboardingPage() {
       </section>
 
       <img className='onboarding-page__bottom-bar' src={onboardingBar} alt='' />
+
+      <BottomButton>Filaby 시작하기</BottomButton>
     </div>
   )
 }
