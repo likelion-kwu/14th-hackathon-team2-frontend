@@ -4,6 +4,9 @@
 */
 :root {
   --color-bottom-button: #4dc4ff;
+
+  --color-text-primary: #000000;
+  --color-text-secondary: rgb(0 0 0 / 50%);
   /*배경 색상*/
   --color-background: #e5f7ff;
 }
