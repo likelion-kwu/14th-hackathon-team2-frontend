@@ -3,6 +3,8 @@ import OnboardingPage from '../pages/onboarding-page/OnboardingPage'
 import InputInforPage from '../pages/inputinfor-page/InputInforPage'
 import TrackSettingPage from '../pages/tracksetting-page/TrackSettingPage'
 import AvatarSettingPage from '../pages/avatarset-page/AvatarSettingPage'
+import StoryPage from '../pages/story-page/StoryPage'
+
 import MainLayout from '../components/main-layout/MainLayout'
 import ReflectionPage from '../pages/reflection-page/entry/ReflectionPage'
 import RankingPage from '../pages/ranking-page/entry/RankingPage'
@@ -24,6 +26,10 @@ export const AppRouter = createBrowserRouter([
   {
     path: '/avatarsetting',
     element: <AvatarSettingPage />,
+  },
+  {
+    path: '/story',
+    element: <StoryPage />,
   },
   {
     path: '/',
