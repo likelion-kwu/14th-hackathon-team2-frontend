@@ -1,0 +1,134 @@
+.rank__container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 50px 20px 100px;
+  gap: 20px;
+  overflow-y: scroll;
+}
+.rank__container::-webkit-scrollbar {
+  display: none;
+}
+
+.rank__title {
+  font-size: 25px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.rank__board {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-white);
+  padding: 30px;
+  border-radius: 30px;
+  gap: 25px;
+}
+
+.rank__board__title {
+  font-size: 20px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.rank__board__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  gap: 24px;
+}
+
+.rank__rankers {
+  display: flex;
+  gap: 30px;
+}
+
+.ranker-second {
+  position: relative;
+  top: 50px;
+}
+
+.ranker-third {
+  position: relative;
+  top: 100px;
+}
+
+.rank__rankers__ranker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.rank__rankers__ranker--nickname {
+  font-size: 17px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.rank__rankers__ranker--score {
+  padding: 6.5px 10px;
+  background-color: rgba(0, 0, 0, 0.05);
+  color: rgba(0, 0, 0, 0.5);
+  border-radius: 100px;
+  font-size: 10px;
+}
+
+.rank__content--bottom {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.rank__date {
+  position: relative;
+  color: rgba(0, 0, 0, 0.25);
+  font-size: 10px;
+  bottom: 0px;
+}
+
+.rank__myrank {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-white);
+  padding: 30px;
+  border-radius: 30px;
+  gap: 25px;
+}
+
+.rank__myrank__title {
+  font-size: 20px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.rank__myrank__content {
+  display: flex;
+  border-radius: 15px;
+  padding: 20px 27px 20px 35px;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(-90deg, rgba(229, 229, 229, 0) 0%, rgba(229, 229, 229, 1) 100%);
+}
+
+.rank__myrank__rank {
+  display: flex;
+  align-items: center;
+}
+
+.rank__myrank__number {
+  width: 80px;
+  font-family: 'SF Pro';
+  font-weight: var(--font-weight-semibold);
+  font-size: 40px;
+  color: var(--color-white);
+}
+.rank__myrank__nickname {
+  font-size: 15px;
+}
+
+.rank__myrank__score {
+  padding: 6.5px 10px;
+  background-color: rgba(0, 0, 0, 0.05);
+  color: rgba(0, 0, 0, 0.5);
+  border-radius: 100px;
+  font-size: 10px;
+}
