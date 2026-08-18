@@ -27,13 +27,15 @@ function InputInforPage() {
     <div className='input-infor-page'>
       <BackButton onClick={handleBack} />
 
-      <MainTitle>
-        시작하기 전,
-        <br />
-        정보를 입력해 주세요
-      </MainTitle>
+      <div className='input-infor-page__header'>
+        <MainTitle>
+          시작하기 전,
+          <br />
+          정보를 입력해 주세요
+        </MainTitle>
 
-      <SubTitle>앞으로 닉네임을 불러드릴게요.</SubTitle>
+        <SubTitle>앞으로 닉네임을 불러드릴게요.</SubTitle>
+      </div>
 
       <Input
         id='name'
