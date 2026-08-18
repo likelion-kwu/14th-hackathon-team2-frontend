@@ -5,6 +5,7 @@ import './StoryPage.css'
 import MainTitle from '../../components/initial-page-title/MainTitle'
 import BackButton from '../../components/back-button/BackButton'
 import BottomButton from '../../components/bottom-button/BottomButton'
+
 import smartphoneImage from '../../assets/story-page/image-smartphone.png'
 
 function StoryPage() {
