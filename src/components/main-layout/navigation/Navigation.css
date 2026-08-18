@@ -18,6 +18,8 @@
   );
 
   isolation: isolate;
+
+  z-index: 50;
 }
 
 .navigation__container::before {

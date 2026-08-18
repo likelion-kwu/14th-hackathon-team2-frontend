@@ -9,6 +9,7 @@ import MainLayout from '../components/main-layout/MainLayout'
 import ReflectionPage from '../pages/reflection-page/entry/ReflectionPage'
 import RankingPage from '../pages/ranking-page/entry/RankingPage'
 import CustomizePage from '../pages/customize-page/entry/CustomizePage'
+import HomePage from '../pages/home-page/entry/HomePage'
 
 export const AppRouter = createBrowserRouter([
   {
@@ -35,7 +36,7 @@ export const AppRouter = createBrowserRouter([
     path: '/',
     element: <MainLayout />,
     children: [
-      { path: 'home', element: <div>home</div> },
+      { path: 'home', element: <HomePage /> },
       { path: 'reflection', element: <ReflectionPage /> },
       { path: 'routine', element: <div>routine</div> },
       { path: 'ranking', element: <RankingPage /> },
