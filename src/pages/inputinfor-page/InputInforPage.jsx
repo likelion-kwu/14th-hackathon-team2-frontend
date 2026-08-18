@@ -21,6 +21,22 @@ function InputInforPage() {
         placeholder='8글자 이내의 닉네임을 입력하세요'
         maxLength={8}
       />
+
+      <fieldset className='gender-input'>
+        <legend className='gender-input__title'>성별</legend>
+
+        <div className='gender-input__options'>
+          <label className='gender-input__option'>
+            <input type='radio' name='gender' value='male' />
+            <span>남성</span>
+          </label>
+
+          <label className='gender-input__option'>
+            <input type='radio' name='gender' value='female' />
+            <span>여성</span>
+          </label>
+        </div>
+      </fieldset>
     </div>
   )
 }
