@@ -23,6 +23,12 @@ function InputInforPage() {
     navigate(-1)
   }
 
+  const handleNext = () => {
+    if (!isFormValid) return
+
+    navigate('/tracksetting')
+  }
+
   return (
     <div className='input-infor-page'>
       <div className='input-infor-page__back-area'>
@@ -90,7 +96,9 @@ function InputInforPage() {
 
       <img className='input-infor-page__bottom-bar' src={bottomBarImage} alt='' />
 
-      <BottomButton disabled={!isFormValid}>다음</BottomButton>
+      <BottomButton onClick={handleNext} disabled={!isFormValid}>
+        다음
+      </BottomButton>
     </div>
   )
 }
