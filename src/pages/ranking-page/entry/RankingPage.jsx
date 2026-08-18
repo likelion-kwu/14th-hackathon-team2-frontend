@@ -41,16 +41,20 @@ function RankingPage() {
               <div className='rank__rankers__ranker--score'>누적 50P</div>
             </div>
           </div>
-          <Icon name='rank-stage' width={320} className='rank__stage' />
-          <div className='rank__date'>2026년 8월 18일 기준</div>
+          <div className='rank__content--bottom'>
+            <Icon name='rank-stage' width={320} className='rank__stage' />
+            <div className='rank__date'>2026년 8월 18일 기준</div>
+          </div>
         </section>
       </section>
 
       <section className='rank__myrank'>
         <div className='rank__myrank__title'>내 순위</div>
         <section className='rank__myrank__content'>
-          <div className='rank__myrank__number'>5</div>
-          <div className='rank__myrank__nickname'>나</div>
+          <div className='rank__myrank__rank'>
+            <div className='rank__myrank__number'>5</div>
+            <div className='rank__myrank__nickname'>나</div>
+          </div>
           <div className='rank__myrank__score'>누적 100P</div>
         </section>
       </section>
