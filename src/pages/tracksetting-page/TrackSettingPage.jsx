@@ -67,7 +67,7 @@ function TrackSettingPage() {
   const handleNext = () => {
     if (selectedTracks.length === 0) return
 
-    navigate('/avatarset')
+    navigate('/avatarsetting')
   }
 
   return (
