@@ -23,6 +23,12 @@ import normalIcon from '../../assets/reflection-page/normal.svg?react'
 import failIcon from '../../assets/reflection-page/fail.svg?react'
 import noneIcon from '../../assets/reflection-page/none.svg?react'
 
+// BottomSheet Icons
+import iconStory from '../../assets/icons/icons-bottomsheet/icon-story.svg?react'
+import iconStreak from '../../assets/icons/icons-bottomsheet/icon-streak.svg?react'
+import iconPoint from '../../assets/icons/icons-bottomsheet/icon-point.svg?react'
+import iconSetting from '../../assets/icons/icons-bottomsheet/icon-setting.svg?react'
+
 // Ranking Page Icons
 import rankStage from '../../assets/rank-page/rank-stage.svg?react'
 import rankProfile from '../../assets/rank-page/rank-profile.svg?react'
@@ -54,6 +60,12 @@ export const iconMap = {
   'normal-icon': normalIcon,
   'fail-icon': failIcon,
   'none-icon': noneIcon, // 상태가 없는 경우를 위해 추가
+
+  // BottomSheet Icons
+  'icon-story': iconStory,
+  'icon-streak': iconStreak,
+  'icon-point': iconPoint,
+  'icon-setting': iconSetting,
 
   // Ranking Page Icons
   'rank-stage': rankStage,

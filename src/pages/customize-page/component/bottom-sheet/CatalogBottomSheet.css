@@ -1,0 +1,68 @@
+.bottom-sheet {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 20px;
+  left: 0;
+
+  width: 100%;
+  height: 100%;
+
+  background-color: var(--color-white);
+  border-radius: 50px 50px 0 0;
+  box-shadow: 0px -5px 20px 0px rgba(0, 0, 0, 0.05);
+
+  z-index: 20;
+
+  transition: transform 0.35s ease;
+}
+
+.bottom-sheet.dragging {
+  transition: none;
+}
+
+.bottom-sheet__drag-area {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 100%;
+  height: 30px;
+
+  cursor: grab;
+  touch-action: none;
+}
+
+.bottom-sheet__drag-area:active {
+  cursor: grabbing;
+}
+
+.bottom-sheet__handle {
+  width: 50px;
+  height: 5px;
+
+  border-radius: 100px;
+
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.bottomSheet__header {
+  display: flex;
+  padding: 0px 30px;
+  justify-content: space-between;
+}
+
+.bottomSheet__header__text--title {
+  font-size: 20px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.bottomSheet__header__text--description {
+  font-size: 17px;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.bottomSheet__header__icons {
+  display: flex;
+  gap: 8px;
+}
