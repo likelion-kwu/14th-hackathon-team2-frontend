@@ -1,0 +1,27 @@
+.bottom-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  width: calc(100% - 50px);
+  max-width: 352px;
+  height: clamp(50px, 6.865svh, 60px);
+  margin-top: clamp(18px, 3.318svh, 29px);
+  margin-bottom: clamp(16px, 2.86svh, 25px);
+  padding: 0;
+
+  border: none;
+  border-radius: 30px;
+
+  background-color: var(--color-bottom-button, #4dc4ff);
+  color: #ffff;
+
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 110%;
+  letter-spacing: 0;
+
+  cursor: pointer;
+}
