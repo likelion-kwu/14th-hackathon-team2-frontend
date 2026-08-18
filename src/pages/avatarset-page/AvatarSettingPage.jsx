@@ -31,11 +31,10 @@ function AvatarSettingPage() {
 
   return (
     <div className='avatar-setting-page'>
+      <div className='avatar-setting-page__back-area'>
+        <BackButton onClick={handleBack} />
+      </div>
       <div className='avatar-setting-page__scroll-area'>
-        <div className='avatar-setting-page__back-area'>
-          <BackButton onClick={handleBack} />
-        </div>
-
         <div className='avatar-setting-page__header'>
           <MainTitle>
             나만의 아바타를

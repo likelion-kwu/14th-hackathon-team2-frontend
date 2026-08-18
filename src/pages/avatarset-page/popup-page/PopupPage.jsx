@@ -1,4 +1,5 @@
 import './PopupPage.css'
+import imageRectangle from '../../../assets/popup-page/image-rectangle.svg'
 
 function PopupPage({ onClose }) {
   const handleSheetClick = (event) => {
@@ -22,7 +23,13 @@ function PopupPage({ onClose }) {
 
         <p className='popup-page__description'>너무 어둡거나 밝은 곳, 조명이 아래는 피해 주세요</p>
 
-        <div className='popup-page__preview' />
+        <div className='popup-page__preview'>
+          <img
+            className='popup-page__preview-image'
+            src={imageRectangle}
+            alt='촬영한 사진 미리보기 영역'
+          />
+        </div>
 
         <button className='popup-page__continue-button' type='button' onClick={onClose}>
           이 모습으로 계속하기
