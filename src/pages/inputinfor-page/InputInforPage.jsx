@@ -1,4 +1,5 @@
 import MainTitle from '../../components/initial-page-title/MainTitle'
+import SubTitle from '../../components/initial-page-title/SubTitle'
 
 function InputInforPage() {
   return (
@@ -8,6 +9,8 @@ function InputInforPage() {
         <br />
         정보를 입력해 주세요
       </MainTitle>
+
+      <SubTitle>앞으로 닉네임을 불러드릴게요.</SubTitle>
     </div>
   )
 }
