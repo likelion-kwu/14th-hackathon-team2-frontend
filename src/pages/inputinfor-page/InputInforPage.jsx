@@ -25,7 +25,9 @@ function InputInforPage() {
 
   return (
     <div className='input-infor-page'>
-      <BackButton onClick={handleBack} />
+      <div className='input-infor-page__back-area'>
+        <BackButton onClick={handleBack} />
+      </div>
 
       <div className='input-infor-page__header'>
         <MainTitle>
@@ -34,7 +36,7 @@ function InputInforPage() {
           정보를 입력해 주세요
         </MainTitle>
 
-        <SubTitle>앞으로 닉네임을 불러드릴게요.</SubTitle>
+        <SubTitle>앞으로 닉네임으로 불러드릴게요.</SubTitle>
       </div>
 
       <div className='input-infor-page__form'>
