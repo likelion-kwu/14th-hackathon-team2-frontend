@@ -1,11 +1,14 @@
 .reflection__container {
   display: flex;
   flex-direction: column;
-  padding-bottom: 60px;
-  height: auto;
-  padding: 50px 20px;
+  height: 100%;
+  padding: 50px 20px 130px;
   gap: 20px;
-  overflow-y: auto;
+  overflow-y: scroll;
+}
+
+.reflection__container::-webkit-scrollbar {
+  display: none;
 }
 
 .reflection__title {
@@ -135,4 +138,61 @@
 
 .reflection__calendar__title--highlight {
   color: #00abff;
+}
+
+.reflection__calendar__calendar {
+  width: 100%;
+}
+
+.reflection__calendar__calendar__header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.reflection__calendar__calendar__month {
+  font-size: 17px;
+  width: 50px;
+  text-align: center;
+}
+
+.reflection__calendar__calendar__arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+  border: none;
+
+  background: none;
+  color: rgba(0, 0, 0, 0.18);
+
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.reflection__calendar__calendar__week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+
+  margin-bottom: 30px;
+
+  text-align: center;
+  font-size: 15px;
+  color: rgba(0, 0, 0, 0.2);
+}
+
+.reflection__calendar__calendar__days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.reflection__calendar__calendar__day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 17px;
+  color: rgba(0, 0, 0, 0.5);
 }
