@@ -1,5 +1,5 @@
 import './BackButton.css'
-import arrowImage from '../../assets/inputinfor-page/image-arrow.svg'
+import arrowImage from '../../assets/icons/icons-another/icons-arrow.svg'
 
 function BackButton({ onClick }) {
   return (
