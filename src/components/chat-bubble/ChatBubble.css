@@ -1,0 +1,17 @@
+.chat__container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+  position: relative;
+  bottom: 140px;
+}
+
+.chat__content {
+  border-radius: 15px;
+  padding: 20px;
+  font-size: 15px;
+  background-color: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(20);
+  box-shadow: 0 5 50 0 rgba(0, 0, 0, 0.1);
+}
