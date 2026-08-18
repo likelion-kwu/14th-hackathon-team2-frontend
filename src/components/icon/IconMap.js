@@ -14,6 +14,7 @@ import navigationCustomDisabled from '../../assets/icons/icons-navigation/icons-
 import giftboxBlue from '../../assets/reflection-page/giftbox-blue.svg?react'
 import giftboxGray from '../../assets/reflection-page/giftbox-gray.svg?react'
 import giftboxPink from '../../assets/reflection-page/giftbox-pink.svg?react'
+import giftboxGreen from '../../assets/reflection-page/giftbox-green.svg?react'
 import giftbar from '../../assets/reflection-page/giftbar.svg?react'
 import arrowLeft from '../../assets/reflection-page/arrow-left.svg?react'
 import arrowRight from '../../assets/reflection-page/arrow-right.svg?react'
@@ -25,6 +26,8 @@ import noneIcon from '../../assets/reflection-page/none.svg?react'
 // Ranking Page Icons
 import rankStage from '../../assets/rank-page/rank-stage.svg?react'
 import rankProfile from '../../assets/rank-page/rank-profile.svg?react'
+
+import chatBubbleArrow from '../../assets/avatar/chat-bubble-arrow.svg?react'
 
 export const iconMap = {
   // Navigation Bar Icons
@@ -43,6 +46,7 @@ export const iconMap = {
   'giftbox-blue': giftboxBlue,
   'giftbox-gray': giftboxGray,
   'giftbox-pink': giftboxPink,
+  'giftbox-green': giftboxGreen,
   'gift-bar': giftbar,
   'arrow-left': arrowLeft,
   'arrow-right': arrowRight,
@@ -54,4 +58,6 @@ export const iconMap = {
   // Ranking Page Icons
   'rank-stage': rankStage,
   'rank-profile': rankProfile,
+
+  'chat-bubble-arrow': chatBubbleArrow,
 }

@@ -58,7 +58,7 @@ function ReflectionPage() {
         <section className='reflection__battlepass__content'>
           <div className='reflection__battlepass__content__boxes'>
             <div className='reflection__battlepass__content__boxes__box '>
-              <Icon name='giftbox-gray' width={110} height={110} />
+              <Icon name='giftbox-green' width={110} height={110} />
             </div>
 
             <div className='reflection__battlepass__content__boxes__box '>
