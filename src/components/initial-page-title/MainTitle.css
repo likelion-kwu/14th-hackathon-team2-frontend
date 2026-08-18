@@ -1,0 +1,11 @@
+.main-title {
+  margin: 0;
+
+  color: #000000;
+
+  font-family: var(--font-family), sans-serif;
+  font-size: 26px;
+  font-weight: var(--font-weight-semibold);
+  line-height: 140%;
+  letter-spacing: 0;
+}
