@@ -6,4 +6,17 @@
 */
 
 @font-face {
+  font-family: 'Pretendard';
+  src: url('../assets/font/PretendardVariable.woff2') format('woff2-variations');
+}
+
+@font-face {
+  font-family: 'SF Pro';
+  src: url('../assets/font/SF-Pro.woff2') format('woff2');
+}
+
+:root {
+  --font-family: 'Pretendard';
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
 }
