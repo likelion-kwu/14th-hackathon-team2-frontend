@@ -1,3 +1,4 @@
+import './Navigation.css'
 import { Icon } from '../../icon/Icon'
 
 function Navigation() {

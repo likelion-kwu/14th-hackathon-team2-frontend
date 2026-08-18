@@ -7,8 +7,8 @@ const MainLayout = () => {
     <div className='mainlayout__container'>
       <div className='mainlayout__page'>
         <Outlet />
+        <Navigation />
       </div>
-      <Navigation />
     </div>
   )
 }
