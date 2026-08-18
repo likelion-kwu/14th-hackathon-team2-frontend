@@ -1,6 +1,7 @@
 import onboardingBackground from '../../assets/onboarding-page/image-background.svg'
 import onboardingCharacters from '../../assets/onboarding-page/image-character.svg'
 import onboardingStar from '../../assets/onboarding-page/image-star.svg'
+import onboardingBar from '../../assets/onboarding-page/image-bottombar.svg'
 
 function OnboardingPage() {
   return (
@@ -15,6 +16,8 @@ function OnboardingPage() {
         />
 
         <img className='onboarding-page__star' src={onboardingStar} alt='' />
+
+        <img className='onboarding-page__bottombar' src={onboardingBar} alt='' />
       </div>
 
       <section className='onboarding-page__text'>
