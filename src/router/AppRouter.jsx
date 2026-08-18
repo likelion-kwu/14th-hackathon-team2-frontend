@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom'
 import OnboardingPage from '../pages/onboarding-page/OnboardingPage'
 import InputInforPage from '../pages/inputinfor-page/InputInforPage'
+import TrackSettingPage from '../pages/tracksetting-page/TrackSettingPage'
 import MainLayout from '../components/main-layout/MainLayout'
 import ReflectionPage from '../pages/reflection-page/entry/ReflectionPage'
 import RankingPage from '../pages/ranking-page/entry/RankingPage'
@@ -14,6 +15,10 @@ export const AppRouter = createBrowserRouter([
   {
     path: '/inputinfor',
     element: <InputInforPage />,
+  },
+  {
+    path: '/tracksetting',
+    element: <TrackSettingPage />,
   },
   {
     path: '/',
