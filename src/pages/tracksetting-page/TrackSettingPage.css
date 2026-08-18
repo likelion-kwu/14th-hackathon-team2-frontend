@@ -12,8 +12,6 @@
   background-color: #ffffff;
 }
 
-/* 상단 뒤로가기 버튼 */
-
 .track-setting-page__back-area {
   flex-shrink: 0;
 
@@ -27,8 +25,6 @@
   transform: translateX(-17px);
 }
 
-/* 상단 제목 */
-
 .track-setting-page__header {
   display: flex;
   flex-direction: column;
@@ -39,8 +35,6 @@
   margin-top: 14px;
   gap: 6px;
 }
-
-/* 트랙 이미지 목록 */
 
 .track-setting-page__track-list {
   display: grid;
@@ -53,8 +47,6 @@
   gap: 12px;
 }
 
-/* 각각의 트랙 선택 영역 */
-
 .track-setting-page__track-option {
   position: relative;
 
@@ -66,8 +58,6 @@
   cursor: pointer;
 }
 
-/* 실제 체크박스는 화면에서 숨김 */
-
 .track-setting-page__track-checkbox {
   position: absolute;
 
@@ -78,8 +68,6 @@
   pointer-events: none;
 }
 
-/* 이미지가 겹쳐지는 영역 */
-
 .track-setting-page__track-visual {
   position: relative;
 
@@ -88,8 +76,6 @@
   width: 100%;
   height: 100%;
 }
-
-/* 기본 이미지와 active 이미지 공통 */
 
 .track-setting-page__track-image {
   position: absolute;
@@ -106,8 +92,6 @@
   transition: opacity 0.15s ease;
 }
 
-/* 처음에는 기본 이미지만 표시 */
-
 .track-setting-page__track-image--default {
   opacity: 1;
 }
@@ -115,8 +99,6 @@
 .track-setting-page__track-image--active {
   opacity: 0;
 }
-
-/* 마우스를 올렸을 때 active 이미지 표시 */
 
 @media (hover: hover) {
   .track-setting-page__track-option:hover .track-setting-page__track-image--default {
@@ -127,8 +109,6 @@
     opacity: 1;
   }
 }
-
-/* 클릭해서 체크된 상태에서는 active 이미지로 고정 */
 
 .track-setting-page__track-checkbox:checked
   + .track-setting-page__track-visual
