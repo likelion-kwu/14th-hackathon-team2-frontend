@@ -7,9 +7,9 @@ function CustomizePage() {
     <div className='custom__container'>
       <div className='custom__title'>커스터마이징</div>
       <div className='custom__avatar__container'>
-        <img src={dummy} className='custom__avatar__container' />
-        <ChatBubble content='아바타 말해요' />
+        <img src={dummy} className='custom__avatar' />
       </div>
+      <ChatBubble content='아바타 말해요' />
     </div>
   )
 }

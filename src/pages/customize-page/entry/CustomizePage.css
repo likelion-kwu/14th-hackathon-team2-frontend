@@ -1,0 +1,25 @@
+.custom__container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 50px 20px 100px;
+  gap: 30px;
+}
+
+.custom__title {
+  font-size: 25px;
+  padding-left: 5px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.custom__avatar__container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.custom__avatar {
+  height: inherit;
+  max-height: 400px;
+}
