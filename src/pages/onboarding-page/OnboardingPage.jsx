@@ -1,9 +1,16 @@
 import './OnboardingPage.css'
+import { useNavigate } from 'react-router-dom'
 import BottomButton from '../../components/bottom-button/BottomButton'
 import onboardingCharacters from '../../assets/onboarding-page/image-character.svg'
 import onboardingBar from '../../assets/onboarding-page/image-bottombar.svg'
 
 function OnboardingPage() {
+  const navigate = useNavigate()
+
+  const handleNext = () => {
+    navigate('/inputinfor')
+  }
+
   return (
     <div className='onboarding-page'>
       <div className='onboarding-page__visual'>
@@ -22,7 +29,7 @@ function OnboardingPage() {
 
       <img className='onboarding-page__bottom-bar' src={onboardingBar} alt='' />
 
-      <BottomButton>Filaby 시작하기</BottomButton>
+      <BottomButton children='Filaby 시작하기' onClick={handleNext} />
     </div>
   )
 }
