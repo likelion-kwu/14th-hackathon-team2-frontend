@@ -1,4 +1,5 @@
 import './ReflectionPage.css'
+import { Icon } from '../../../components/icon/Icon'
 
 function ReflectionPage() {
   return (
@@ -8,18 +9,24 @@ function ReflectionPage() {
         <div className='reflection__battlepass__title'>곧 얻을 수 있어요</div>
         <section className='reflection__battlepass__content'>
           <div className='reflection__battlepass__content__boxes'>
-            <div className='reflection__battlepass__content__boxes__box'>상자1</div>
-            <div className='reflection__battlepass__content__boxes__box'>상자2</div>
-            <div className='reflection__battlepass__content__boxes__box'>상자3</div>
+            <div className='reflection__battlepass__content__boxes__box '>
+              <Icon name='giftbox-gray' width={110} height={110} />
+            </div>
+            <div className='reflection__battlepass__content__boxes__box '>
+              <Icon name='giftbox-blue' width={110} height={110} />
+            </div>
+            <div className='reflection__battlepass__content__boxes__box '>
+              <Icon name='giftbox-pink' width={110} height={110} />
+            </div>
           </div>
-          <div className='reflection__battlepass__content__bar'></div>
+          <Icon name='gift-bar' width={362} className='reflection__battlepass__content__bar' />
           <div className='reflection__battlepass__content__text'>
             <div className='reflection__battlepass__content__text--box'>
               <div className='reflection__battlepass__content__text--title'>상의</div>
               <div className='reflection__battlepass__content__text--point'>100P</div>
             </div>
             <div className='reflection__battlepass__content__text--box'>
-              <div className='reflection__battlepass__content__text--title'>상의</div>
+              <div className='reflection__battlepass__content__text--title'>하의</div>
               <div className='reflection__battlepass__content__text--point'>100P</div>
             </div>
             <div className='reflection__battlepass__content__text--box'>

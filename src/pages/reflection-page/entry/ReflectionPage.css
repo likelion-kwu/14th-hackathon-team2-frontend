@@ -1,6 +1,138 @@
 .reflection__container {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   padding-bottom: 60px;
-  height: 100vh;
+  height: auto;
+  padding: 50px 20px;
+  gap: 20px;
+  overflow-y: auto;
+}
+
+.reflection__title {
+  font-size: 25px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.reflection__battlepass {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-white);
+  padding: 30px;
+  border-radius: 30px;
+  gap: 25px;
+}
+
+.reflection__battlepass__title {
+  font-size: 20px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.reflection__battlepass__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.reflection__battlepass__content__boxes {
+  display: flex;
+  height: 95px;
+}
+
+.reflection__battlepass__content__boxes__box {
+  position: relative;
+
+  width: 110px;
+  height: 96px;
+
+  overflow: hidden;
+  animation: vibration 0.6s infinite;
+}
+@keyframes vibration {
+  from {
+    transform: rotate(2deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+.reflection__battlepass__content__boxes__box::after {
+  content: '';
+
+  position: absolute;
+  top: -50%;
+  left: -100%;
+
+  width: 40%;
+  height: 200%;
+
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(255, 255, 255, 0.2) 25%,
+    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0.2) 75%,
+    transparent 100%
+  );
+
+  transform: rotate(40deg);
+
+  animation: gift-shimmer 2.5s ease-in-out infinite;
+
+  pointer-events: none;
+}
+
+@keyframes gift-shimmer {
+  0% {
+    left: -100%;
+  }
+
+  60% {
+    left: 150%;
+  }
+
+  100% {
+    left: 150%;
+  }
+}
+
+.reflection__battlepass__content__text {
+  margin-top: 15px;
+  display: flex;
+}
+
+.reflection__battlepass__content__text--box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 110px;
+}
+
+.reflection__battlepass__content__text--title {
+  font-size: 15px;
+}
+
+.reflection__battlepass__content__text--point {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.reflection__calendar {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-white);
+  padding: 30px;
+  border-radius: 30px;
+
+  gap: 30px;
+}
+
+.reflection__calendar__title {
+  font-size: 20px;
+  font-weight: var(--font-weight-semibold);
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.reflection__calendar__title--highlight {
+  color: #00abff;
 }
