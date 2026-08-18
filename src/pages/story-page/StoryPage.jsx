@@ -5,7 +5,8 @@ import './StoryPage.css'
 import MainTitle from '../../components/initial-page-title/MainTitle'
 import BackButton from '../../components/back-button/BackButton'
 import BottomButton from '../../components/bottom-button/BottomButton'
-import smartphoneImage from '../../assets/story-page/image-smartphone.svg'
+
+import smartphoneImage from '../../assets/story-page/image-smartphone.png'
 
 function StoryPage() {
   const navigate = useNavigate()
@@ -52,12 +53,11 @@ function StoryPage() {
             </h2>
 
             <p className='story-page__description'>
+              {' '}
               평행세계에는 나와 닮은 또 다른 내가 살고 있습니다. 하지만 그곳의 나는 무너진 일상
-              속에서 건강도, 자신감도 잃어버린 채 살아가고 있죠.
-              <br />
-              <br />
-              어느 날 거짓말처럼 두 세계가 연결되고, 내가 실천한 작은 루틴들이 그곳의 나에게 새로운
-              변화를 만들어 냅니다.
+              속에서 건강도, 자신감도 잃어버린 채 살아가고 있죠. 어느 날 거짓말처럼 두 세계가
+              연결되고, 네 명의 필라비 크루와 함께 실천하는 작은 루틴들이 평행세계 속 나에게 기적
+              같은 변화를 일으키기 시작합니다.
             </p>
           </section>
         </main>
