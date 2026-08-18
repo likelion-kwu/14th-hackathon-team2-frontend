@@ -1,0 +1,38 @@
+.navigation__container {
+  position: fixed;
+  bottom: 0;
+  display: flex;
+  width: 100%;
+  max-width: 450px;
+  height: 150px;
+
+  align-items: end;
+  justify-content: space-between;
+  padding: 40px;
+
+  background: linear-gradient(
+    180deg,
+    rgba(178, 230, 255, 0) 0%,
+    rgb(178, 230, 255, 0.5) 80%,
+    rgb(178, 230, 255, 1) 100%
+  );
+
+  isolation: isolate;
+}
+
+.navigation__container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+
+  /* 위 10px 정도에서만 blur가 0 → 100% */
+  mask-image: linear-gradient(to bottom, transparent 0px, black 80px, black 100%);
+
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 80px, black 100%);
+
+  z-index: -1;
+  pointer-events: none;
+}
