@@ -14,6 +14,7 @@ import navigationCustomDisabled from '../../assets/icons/icons-navigation/icons-
 import giftboxBlue from '../../assets/reflection-page/giftbox-blue.svg?react'
 import giftboxGray from '../../assets/reflection-page/giftbox-gray.svg?react'
 import giftboxPink from '../../assets/reflection-page/giftbox-pink.svg?react'
+import giftboxGreen from '../../assets/reflection-page/giftbox-green.svg?react'
 import giftbar from '../../assets/reflection-page/giftbar.svg?react'
 import arrowLeft from '../../assets/reflection-page/arrow-left.svg?react'
 import arrowRight from '../../assets/reflection-page/arrow-right.svg?react'
@@ -43,6 +44,7 @@ export const iconMap = {
   'giftbox-blue': giftboxBlue,
   'giftbox-gray': giftboxGray,
   'giftbox-pink': giftboxPink,
+  'giftbox-green': giftboxGreen,
   'gift-bar': giftbar,
   'arrow-left': arrowLeft,
   'arrow-right': arrowRight,
