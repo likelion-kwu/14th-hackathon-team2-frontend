@@ -25,3 +25,8 @@
 
   cursor: pointer;
 }
+
+.bottom-button:disabled {
+  background-color: #d8f2ff;
+  cursor: default;
+}

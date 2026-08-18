@@ -1,6 +1,6 @@
 import './Input.css'
 
-function Input({ id, title, placeholder, maxLength }) {
+function Input({ id, title, placeholder, maxLength, value, onChange }) {
   return (
     <div className='input'>
       <label className='input__title' htmlFor={id}>
@@ -14,6 +14,8 @@ function Input({ id, title, placeholder, maxLength }) {
         type='text'
         placeholder={placeholder}
         maxLength={maxLength}
+        value={value}
+        onChange={onChange}
       />
     </div>
   )
