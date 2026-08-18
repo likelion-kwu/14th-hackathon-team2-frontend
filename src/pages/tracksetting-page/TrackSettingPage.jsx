@@ -1,4 +1,6 @@
 import './TrackSettingPage.css'
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import MainTitle from '../../components/initial-page-title/MainTitle'
 import SubTitle from '../../components/initial-page-title/SubTitle'
@@ -44,10 +46,34 @@ const TRACK_LIST = [
 ]
 
 function TrackSettingPage() {
+  const navigate = useNavigate()
+
+  const [selectedTracks, setSelectedTracks] = useState([])
+
+  const handleBack = () => {
+    navigate(-1)
+  }
+
+  const handleTrackChange = (trackId, isChecked) => {
+    setSelectedTracks((previousTracks) => {
+      if (isChecked) {
+        return [...previousTracks, trackId]
+      }
+
+      return previousTracks.filter((id) => id !== trackId)
+    })
+  }
+
+  const handleNext = () => {
+    if (selectedTracks.length === 0) return
+
+    navigate('/avatarset')
+  }
+
   return (
     <div className='track-setting-page'>
       <div className='track-setting-page__back-area'>
-        <BackButton />
+        <BackButton onClick={handleBack} />
       </div>
 
       <div className='track-setting-page__header'>
@@ -61,35 +87,43 @@ function TrackSettingPage() {
       </div>
 
       <div className='track-setting-page__track-list'>
-        {TRACK_LIST.map((track) => (
-          <label key={track.id} className='track-setting-page__track-option'>
-            <input
-              className='track-setting-page__track-checkbox'
-              type='checkbox'
-              name='track'
-              value={track.id}
-            />
+        {TRACK_LIST.map((track) => {
+          const isSelected = selectedTracks.includes(track.id)
 
-            <span className='track-setting-page__track-visual'>
-              <img
-                className='track-setting-page__track-image track-setting-page__track-image--default'
-                src={track.defaultImage}
-                alt={track.label}
+          return (
+            <label key={track.id} className='track-setting-page__track-option'>
+              <input
+                className='track-setting-page__track-checkbox'
+                type='checkbox'
+                name='track'
+                value={track.id}
+                checked={isSelected}
+                onChange={(event) => handleTrackChange(track.id, event.target.checked)}
               />
 
-              <img
-                className='track-setting-page__track-image track-setting-page__track-image--active'
-                src={track.activeImage}
-                alt=''
-              />
-            </span>
-          </label>
-        ))}
+              <span className='track-setting-page__track-visual'>
+                <img
+                  className='track-setting-page__track-image track-setting-page__track-image--default'
+                  src={track.defaultImage}
+                  alt={track.label}
+                />
+
+                <img
+                  className='track-setting-page__track-image track-setting-page__track-image--active'
+                  src={track.activeImage}
+                  alt=''
+                />
+              </span>
+            </label>
+          )
+        })}
       </div>
 
       <img className='track-setting-page__bottom-bar' src={bottomBarImage} alt='' />
 
-      <BottomButton disabled>다음</BottomButton>
+      <BottomButton onClick={handleNext} disabled={selectedTracks.length === 0}>
+        다음
+      </BottomButton>
     </div>
   )
 }
