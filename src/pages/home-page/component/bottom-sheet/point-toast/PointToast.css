@@ -1,0 +1,79 @@
+.pointToast {
+  position: absolute;
+  right: 0;
+  bottom: 250px;
+  left: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  transform: translateY(var(--fixed-layer-offset-y, 0));
+  transition: transform 0.35s ease;
+  pointer-events: none;
+}
+
+.bottom-sheet.dragging .pointToast {
+  transition: none;
+}
+
+.pointToast__content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 138px;
+  height: 40px;
+  padding: 0 14px 0 8px;
+  gap: 8px;
+  box-sizing: border-box;
+  border-radius: 22px;
+  background-color: rgba(71, 84, 93, 0.78);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: pointToastShow 2s ease forwards;
+}
+
+.pointToast__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background-color: #5badf8;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 300;
+  line-height: 100%;
+}
+
+.pointToast__message {
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 100%;
+  white-space: nowrap;
+}
+
+@keyframes pointToastShow {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+
+  15% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  82% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(4px) scale(0.98);
+  }
+}

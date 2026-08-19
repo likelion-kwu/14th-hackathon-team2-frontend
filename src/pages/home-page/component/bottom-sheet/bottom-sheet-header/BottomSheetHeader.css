@@ -1,0 +1,60 @@
+.bottomSheet__header {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-shrink: 0;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 0 30px;
+}
+
+.bottomSheet__header__text {
+  display: flex;
+  flex-direction: column;
+}
+
+.bottomSheet__header__text--title {
+  font-size: 20px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.bottomSheet__header__text--description {
+  margin-top: 2px;
+  color: rgba(0, 0, 0, 0.5);
+  font-size: 17px;
+}
+
+.bottomSheet__header__icons {
+  position: relative;
+  z-index: 11;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+.bottomSheet__header__icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  appearance: none;
+  background-color: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bottomSheet__header__icon-button:active {
+  transform: scale(0.96);
+}
+
+.bottomSheet__header__icon-button svg {
+  display: block;
+  pointer-events: none;
+}

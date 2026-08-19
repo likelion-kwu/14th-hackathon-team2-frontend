@@ -19,7 +19,7 @@
 
   isolation: isolate;
 
-  z-index: 50;
+  z-index: 20;
 }
 
 .navigation__container::before {
