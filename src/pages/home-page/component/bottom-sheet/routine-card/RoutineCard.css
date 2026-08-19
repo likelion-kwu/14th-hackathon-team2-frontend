@@ -1,0 +1,111 @@
+.routineCard {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 64px;
+  padding: 0 14px 0 18px;
+  box-sizing: border-box;
+  border-radius: 18px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+}
+
+.routineCard--skin {
+  background: linear-gradient(90deg, #ffffff 48%, rgba(83, 113, 243, 0.12) 100%);
+}
+
+.routineCard--wellbeing {
+  background: linear-gradient(90deg, #ffffff 48%, rgba(241, 132, 75, 0.12) 100%);
+}
+
+.routineCard--diet {
+  background: linear-gradient(90deg, #ffffff 48%, rgba(125, 83, 238, 0.12) 100%);
+}
+
+.routineCard--health {
+  background: linear-gradient(90deg, #ffffff 48%, rgba(211, 71, 111, 0.12) 100%);
+}
+
+.routineCard--completed {
+  background: linear-gradient(90deg, #ffffff 48%, rgba(117, 198, 255, 0.25) 100%);
+}
+
+.routineCard__check {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  border-radius: 50%;
+  appearance: none;
+  background-color: #ffffff;
+  cursor: pointer;
+}
+
+.routineCard__check--completed {
+  position: relative;
+  border: none;
+  background-color: #65c96b;
+}
+
+.routineCard__check--completed::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 7px;
+  width: 5px;
+  height: 9px;
+  border-right: 2px solid #ffffff;
+  border-bottom: 2px solid #ffffff;
+  transform: rotate(45deg);
+}
+
+.routineCard__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  margin-left: 14px;
+}
+
+.routineCard__category {
+  overflow: hidden;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 10px;
+  line-height: 120%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.routineCard__title {
+  overflow: hidden;
+  margin-top: 2px;
+  color: rgba(0, 0, 0, 0.85);
+  font-size: 13px;
+  font-weight: var(--font-weight-semibold);
+  line-height: 120%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.routineCard__character {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  margin-left: auto;
+  object-fit: contain;
+}
+
+.routineCard__reward-button {
+  flex-shrink: 0;
+  height: 38px;
+  margin-left: auto;
+  padding: 0 18px;
+  border: none;
+  border-radius: 20px;
+  background-color: #74c3f8;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+}

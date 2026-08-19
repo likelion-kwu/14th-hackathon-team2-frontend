@@ -1,0 +1,85 @@
+.routineTimeline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 500px;
+}
+
+.routineTimeline__start,
+.routineTimeline__end {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 2px;
+}
+
+.routineTimeline__sun,
+.routineTimeline__moon {
+  display: block;
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.routineTimeline__time {
+  flex-shrink: 0;
+  color: rgba(0, 0, 0, 0.3);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 100%;
+  white-space: nowrap;
+}
+
+.routineTimeline__dots {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  width: 100%;
+  min-height: 0;
+}
+
+.routineTimeline__dots--3 {
+  flex: 3;
+}
+
+.routineTimeline__dots--4 {
+  flex: 4;
+}
+
+.routineTimeline__dots--5 {
+  flex: 5;
+}
+
+.routineTimeline__dot {
+  display: block;
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.routineTimeline__dot--active {
+  background-color: #62cb68;
+}
+
+.routineTimeline__now {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  height: 28px;
+  padding: 0 10px;
+  box-sizing: border-box;
+  border-radius: 20px;
+  background-color: #62cb68;
+  color: var(--color-white);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 100%;
+  white-space: nowrap;
+}
