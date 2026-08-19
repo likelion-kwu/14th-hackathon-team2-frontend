@@ -1,6 +1,141 @@
 import { useRef, useState } from 'react'
 import { Icon } from '../../../../components/icon/Icon'
+
+import imageDiet from '../../../../assets/home-bottom-sheet/character/image-diet.svg'
+import imageHealth from '../../../../assets/home-bottom-sheet/character/image-health.svg'
+import imageSkin from '../../../../assets/home-bottom-sheet/character/image-skin.svg'
+import imageWellbeing from '../../../../assets/home-bottom-sheet/character/image-wellbeing.svg'
+import imageMoon from '../../../../assets/home-bottom-sheet/image-moon.svg'
+import imageSun from '../../../../assets/home-bottom-sheet/image-sun.svg'
+
 import './HomeBottomSheet.css'
+
+const ROUTINES = [
+  {
+    id: 1,
+    category: 'Skin',
+    title: '텍스트',
+    theme: 'skin',
+    characterImage: imageSkin,
+    isCompleted: false,
+    rewardPoint: 5,
+  },
+  {
+    id: 2,
+    category: 'Well-being',
+    title: '텍스트',
+    theme: 'wellbeing',
+    characterImage: imageWellbeing,
+    isCompleted: false,
+    rewardPoint: 5,
+  },
+  {
+    id: 3,
+    category: 'Diet',
+    title: '텍스트',
+    theme: 'diet',
+    characterImage: imageDiet,
+    isCompleted: false,
+    rewardPoint: 10,
+  },
+  {
+    id: 4,
+    category: 'Skin',
+    title: '텍스트',
+    theme: 'skin',
+    characterImage: imageSkin,
+    isCompleted: false,
+    rewardPoint: 5,
+  },
+  {
+    id: 5,
+    category: 'Health & Fit',
+    title: '텍스트',
+    theme: 'health',
+    characterImage: imageHealth,
+    isCompleted: false,
+    rewardPoint: 10,
+  },
+]
+
+function TimelineDots({ count, active = false }) {
+  return (
+    <div className={`routineTimeline__dots routineTimeline__dots--${count}`}>
+      {Array.from({ length: count }).map((_, index) => (
+        <span
+          key={index}
+          className={`routineTimeline__dot ${active ? 'routineTimeline__dot--active' : ''}`}
+        />
+      ))}
+    </div>
+  )
+}
+
+function RoutineTimeline() {
+  return (
+    <div className='routineTimeline'>
+      <div className='routineTimeline__start'>
+        <img src={imageSun} alt='' className='routineTimeline__sun' />
+
+        <span className='routineTimeline__time'>06:00</span>
+      </div>
+
+      <TimelineDots count={2} active />
+
+      <span className='routineTimeline__now'>Now</span>
+
+      <TimelineDots count={4} active />
+
+      <span className='routineTimeline__time'>12:00</span>
+
+      <TimelineDots count={5} />
+
+      <span className='routineTimeline__time'>15:00</span>
+
+      <TimelineDots count={5} />
+
+      <span className='routineTimeline__time'>18:00</span>
+
+      <TimelineDots count={5} />
+
+      <span className='routineTimeline__time'>21:00</span>
+
+      <TimelineDots count={3} />
+
+      <div className='routineTimeline__end'>
+        <img src={imageMoon} alt='' className='routineTimeline__moon' />
+
+        <span className='routineTimeline__time'>24:00</span>
+      </div>
+    </div>
+  )
+}
+function RoutineCard({ category, title, theme, characterImage, isCompleted, rewardPoint }) {
+  return (
+    <article
+      className={`routineCard routineCard--${theme} ${isCompleted ? 'routineCard--completed' : ''}`}
+    >
+      <button
+        type='button'
+        className={`routineCard__check ${isCompleted ? 'routineCard__check--completed' : ''}`}
+        aria-label={`${title} 완료 여부`}
+      />
+
+      <div className='routineCard__text'>
+        <span className='routineCard__category'>{category}</span>
+        <span className='routineCard__title'>{title}</span>
+      </div>
+
+      {isCompleted ? (
+        <button type='button' className='routineCard__reward-button'>
+          {rewardPoint}P 받기
+        </button>
+      ) : (
+        <img src={characterImage} alt={`${category} 캐릭터`} className='routineCard__character' />
+      )}
+    </article>
+  )
+}
 
 function HomeBottomSheet({ onDragProgress }) {
   const [sheetState, setSheetState] = useState('closed')
@@ -114,6 +249,26 @@ function HomeBottomSheet({ onDragProgress }) {
             className='bottomSheet__header__icons--icon'
           />
         </div>
+      </div>
+
+      <div className='bottomSheet__content'>
+        <section className='bottomSheet__routine-section'>
+          <RoutineTimeline />
+
+          <div className='routineList'>
+            {ROUTINES.map((routine) => (
+              <RoutineCard
+                key={routine.id}
+                category={routine.category}
+                title={routine.title}
+                theme={routine.theme}
+                characterImage={routine.characterImage}
+                isCompleted={routine.isCompleted}
+                rewardPoint={routine.rewardPoint}
+              />
+            ))}
+          </div>
+        </section>
       </div>
     </div>
   )
