@@ -15,11 +15,17 @@
 .set__header {
   display: flex;
   align-items: center;
+  justify-content: center;
+  width: 100%;
+  position: relative;
 }
 
 .set__header--back {
-  position: fixed;
+  position: absolute;
   left: 25px;
+}
+.set__header--title {
+  display: flex;
 }
 
 .set__content {

@@ -14,7 +14,7 @@ import SettingPage from '../pages/setting-page/entry/SettingPage'
 
 export const AppRouter = createBrowserRouter([
   {
-    path: '/onboarding',
+    path: '/',
     element: <OnboardingPage />,
   },
   {
@@ -37,7 +37,6 @@ export const AppRouter = createBrowserRouter([
     path: '/',
     element: <MainLayout />,
     children: [
-      { path: '', element: <HomePage /> },
       { path: 'home', element: <HomePage /> },
       { path: 'reflection', element: <ReflectionPage /> },
       { path: 'ranking', element: <RankingPage /> },
@@ -45,5 +44,5 @@ export const AppRouter = createBrowserRouter([
       { path: 'setting', element: <SettingPage /> },
     ],
   },
-  { path: '*', element: <div>404 Not Found</div> },
+  { path: '/', element: <OnboardingPage /> },
 ])
