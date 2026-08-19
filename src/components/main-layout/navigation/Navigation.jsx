@@ -36,6 +36,7 @@ function Navigation({ isRoutinePlusOpen, onRoutinePlusClick, onNavigate }) {
     {
       key: 'customize',
       path: '/customize',
+      activePaths: ['/customize', '/setting'],
       activeIcon: 'navigation-custom-active',
       disabledIcon: 'navigation-custom-disabled',
     },

@@ -34,8 +34,8 @@
   inset: 0;
   z-index: -1;
 
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(50px);
+  -webkit-backdrop-filter: blur(50px);
 
   mask-image: linear-gradient(to bottom, transparent 0, black 80px, black 100%);
 
