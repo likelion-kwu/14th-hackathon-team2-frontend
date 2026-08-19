@@ -13,8 +13,9 @@
   background: linear-gradient(
     180deg,
     rgba(178, 230, 255, 0) 0%,
-    rgb(178, 230, 255, 0.5) 80%,
-    rgb(178, 230, 255, 1) 100%
+    rgba(178, 230, 255, 0.8) 50%,
+    rgba(178, 230, 255, 0.89) 70%,
+    rgba(178, 230, 255, 1) 100%
   );
 
   isolation: isolate;
@@ -27,13 +28,13 @@
   position: absolute;
   inset: 0;
 
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(50px);
+  -webkit-backdrop-filter: blur(50px);
 
-  /* 위 10px 정도에서만 blur가 0 → 100% */
-  mask-image: linear-gradient(to bottom, transparent 0px, black 80px, black 100%);
+  /* 위 10px 정도에서만 blur가 0 → 100%
+  mask-image: linear-gradient(to bottom, transparent 0px, black 20px, black 100%);
 
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 80px, black 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 20px, black 100%); */
 
   z-index: -1;
   pointer-events: none;
