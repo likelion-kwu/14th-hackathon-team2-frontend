@@ -1,0 +1,443 @@
+.routinePlus__layer,
+.routinePlus__layer * {
+  box-sizing: border-box;
+}
+
+.routinePlus__layer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 76px;
+  left: 0;
+  z-index: 30;
+
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+
+  padding: 0 16px 8px;
+
+  background-color: rgba(22, 46, 61, 0.06);
+  animation: routinePlusFadeIn 180ms ease-out;
+}
+
+.routinePlus__sheet {
+  width: 100%;
+  max-width: 418px;
+  max-height: calc(100dvh - 108px);
+  overflow-y: auto;
+
+  padding: 13px 20px 18px;
+  border-radius: 42px;
+
+  background-color: #fff;
+  box-shadow: 0 10px 30px rgba(38, 61, 76, 0.12);
+
+  scrollbar-width: none;
+  animation: routinePlusSlideUp 240ms ease-out;
+}
+
+.routinePlus__sheet::-webkit-scrollbar {
+  display: none;
+}
+
+.routinePlus__selectSheet {
+  min-height: min(414px, calc(100dvh - 108px));
+}
+
+.routinePlus__detailSheet {
+  min-height: min(470px, calc(100dvh - 108px));
+}
+
+.routinePlus__dragHandle {
+  display: block;
+  width: 38px;
+  height: 4px;
+
+  margin: 0 auto 23px;
+  padding: 0;
+
+  border: 0;
+  border-radius: 999px;
+
+  background-color: #e2e2e2;
+  cursor: pointer;
+}
+
+.routinePlus__selectTitle,
+.routinePlus__detailTitle {
+  margin: 0;
+
+  color: #161616;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.routinePlus__selectTitle {
+  margin-bottom: 17px;
+}
+
+/* 분야 선택 영역 */
+
+.routinePlus__categoryGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+
+  margin-bottom: 11px;
+}
+
+.routinePlus__categoryButton {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+
+  background: transparent;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.routinePlus__categoryButton:focus-visible {
+  border-radius: 20px;
+  outline: 2px solid #5270e7;
+  outline-offset: 2px;
+}
+
+.routinePlus__categoryButton:active {
+  transform: scale(0.98);
+}
+
+.routinePlus__categoryImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+/* 투두 선택 버튼 */
+
+.routinePlus__todoSelectButton {
+  width: 100%;
+  height: 48px;
+
+  padding: 0;
+  border: 0;
+  border-radius: 25px;
+
+  background-color: #f2f2f2;
+  color: #aaa;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.routinePlus__todoSelectButton:hover {
+  background-color: #e9e9e9;
+  color: #888;
+}
+
+/* 루틴/투두 입력 화면 */
+
+.routinePlus__form {
+  display: flex;
+  flex-direction: column;
+}
+
+.routinePlus__detailTitle span {
+  color: var(--routine-accent);
+}
+
+.routinePlus__characterArea {
+  display: flex;
+  min-height: 86px;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+
+  margin: 7px 0 8px;
+}
+
+.routinePlus__characterImage {
+  display: block;
+  width: 65px;
+  height: 65px;
+
+  object-fit: contain;
+}
+
+.routinePlus__speechBubble {
+  position: relative;
+
+  margin: 0;
+  padding: 13px 16px;
+  border-radius: 14px;
+
+  background-color: var(--routine-soft);
+  color: #333;
+
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.routinePlus__speechBubble::before {
+  content: '';
+
+  position: absolute;
+  top: 27px;
+  left: -7px;
+
+  width: 14px;
+  height: 14px;
+
+  background-color: var(--routine-soft);
+  transform: rotate(45deg);
+}
+
+.routinePlus__inputSection {
+  margin-bottom: 22px;
+}
+
+.routinePlus__sectionTitle {
+  display: block;
+
+  margin: 0 0 9px;
+
+  color: #222;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.routinePlus__textField {
+  position: relative;
+}
+
+.routinePlus__textField input {
+  width: 100%;
+  height: 44px;
+
+  padding: 0 43px 0 14px;
+  border: 0;
+  border-radius: 13px;
+  outline: none;
+
+  background-color: #f7f7f7;
+  color: #333;
+
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.routinePlus__textField input::placeholder {
+  color: #d1d1d1;
+}
+
+.routinePlus__textField input:focus {
+  box-shadow: 0 0 0 2px var(--routine-accent, #76b9ed);
+}
+
+.routinePlus__clearButton {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+
+  display: flex;
+  width: 20px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+
+  background-color: #dedede;
+  color: #fff;
+
+  font-size: 16px;
+  line-height: 1;
+
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.routinePlus__settingSection {
+  margin-bottom: 20px;
+}
+
+.routinePlus__settingList {
+  overflow: hidden;
+  border-radius: 14px;
+  background-color: #f7f7f7;
+}
+
+.routinePlus__settingRow {
+  display: flex;
+  width: 100%;
+  min-height: 43px;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 14px;
+  border-bottom: 1px solid #ececec;
+}
+
+.routinePlus__settingRow:last-child {
+  border-bottom: 0;
+}
+
+.routinePlus__settingLabel {
+  flex-shrink: 0;
+
+  color: #333;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.routinePlus__settingControl {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.routinePlus__settingControl select {
+  width: 100%;
+  height: 42px;
+
+  padding: 0;
+  border: 0;
+  outline: 0;
+
+  background: transparent;
+  color: #999;
+
+  font-family: inherit;
+  font-size: 11px;
+  text-align: right;
+
+  cursor: pointer;
+  appearance: none;
+}
+
+.routinePlus__arrow {
+  flex-shrink: 0;
+
+  color: #c9c9c9;
+  font-size: 20px;
+  font-weight: 300;
+}
+
+.routinePlus__settingRow > input {
+  width: 145px;
+  height: 42px;
+
+  padding: 0;
+  border: 0;
+  outline: none;
+
+  background: transparent;
+  color: #999;
+
+  font-family: inherit;
+  font-size: 11px;
+  text-align: right;
+
+  cursor: pointer;
+  color-scheme: light;
+}
+
+.routinePlus__submitButton {
+  width: 100%;
+  height: 48px;
+
+  margin-top: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 25px;
+
+  background-color: var(--routine-accent);
+  color: #fff;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.routinePlus__submitButton:active {
+  transform: scale(0.99);
+}
+
+.routinePlus__todoSheet {
+  --routine-accent: #76b9ed;
+}
+
+.routinePlus__todoInputSection {
+  margin-top: 26px;
+}
+
+.routinePlus__todoSubmitButton {
+  background-color: #76b9ed;
+}
+
+@keyframes routinePlusFadeIn {
+  from {
+    background-color: rgba(22, 46, 61, 0);
+  }
+
+  to {
+    background-color: rgba(22, 46, 61, 0.06);
+  }
+}
+
+@keyframes routinePlusSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(35px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-height: 650px) {
+  .routinePlus__sheet {
+    border-radius: 32px;
+  }
+
+  .routinePlus__dragHandle {
+    margin-bottom: 15px;
+  }
+
+  .routinePlus__characterArea {
+    min-height: 70px;
+  }
+
+  .routinePlus__characterImage {
+    width: 54px;
+    height: 54px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .routinePlus__layer,
+  .routinePlus__sheet {
+    animation: none;
+  }
+}
