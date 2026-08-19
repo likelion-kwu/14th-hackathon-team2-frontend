@@ -1,10 +1,72 @@
 import { useRef, useState } from 'react'
 import { Icon } from '../../../../components/icon/Icon'
+import imagePlaceholder from '.././../../../assets/avatar/avatar-items/test-item.png'
+import ItemUnlockModal from '../item-unlock-modal/ItemUnlockModal'
 import './CatalogBottomSheet.css'
+import { useNavigate } from 'react-router-dom'
 
 function CatalogBottomSheet({ onDragProgress }) {
+  const navigate = useNavigate()
   const [sheetState, setSheetState] = useState('closed')
   const [dragY, setDragY] = useState(null)
+
+  const [selectedLockedItem, setSelectedLockedItem] = useState(null)
+
+  // 나중에 api 연결 때 분리 후 매핑
+  const [avatarItems, setAvatarItems] = useState([
+    { id: 1, image: imagePlaceholder, unlocked: true, equipped: true },
+    { id: 2, image: imagePlaceholder, unlocked: true, equipped: false },
+    { id: 3, image: imagePlaceholder, unlocked: false, equipped: false },
+    { id: 4, image: imagePlaceholder, unlocked: true, equipped: false },
+    { id: 5, image: imagePlaceholder, unlocked: false, equipped: false },
+    { id: 6, image: imagePlaceholder, unlocked: false, equipped: false },
+    { id: 7, image: imagePlaceholder, unlocked: true, equipped: false },
+    { id: 8, image: imagePlaceholder, unlocked: false, equipped: false },
+    { id: 9, image: imagePlaceholder, unlocked: false, equipped: false },
+  ])
+
+  const handleItemClick = (id) => {
+    const selectedItem = avatarItems.find((item) => item.id === id)
+
+    if (!selectedItem) return
+
+    if (!selectedItem.unlocked) {
+      setSelectedLockedItem(selectedItem)
+      return
+    }
+
+    setAvatarItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              equipped: !item.equipped,
+            }
+          : item,
+      ),
+    )
+  }
+
+  const handleUnlockItem = () => {
+    if (!selectedLockedItem) return
+
+    setAvatarItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === selectedLockedItem.id
+          ? {
+              ...item,
+              unlocked: true,
+            }
+          : item,
+      ),
+    )
+
+    setSelectedLockedItem(null)
+  }
+
+  const handleCloseUnlockModal = () => {
+    setSelectedLockedItem(null)
+  }
 
   const startYRef = useRef(0)
   const startTranslateRef = useRef(0)
@@ -76,46 +138,69 @@ function CatalogBottomSheet({ onDragProgress }) {
   }
 
   return (
-    <div
-      className={`bottom-sheet ${dragY !== null ? 'dragging' : ''}`}
-      style={{
-        transform: `translateY(${getCurrentTranslate()}px)`,
-      }}
-    >
+    <>
       <div
-        className='bottom-sheet__drag-area'
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerUp}
+        className={`bottom-sheet ${dragY !== null ? 'dragging' : ''}`}
+        style={{
+          transform: `translateY(${getCurrentTranslate()}px)`,
+        }}
       >
-        <div className='bottom-sheet__handle' />
-      </div>
-
-      <div className='bottomSheet__header'>
-        <div className='bottomSheet__header__text'>
-          <div className='bottomSheet__header__text--title'>오늘의 루틴</div>
-
-          <div className='bottomSheet__header__text--description'>5개 중 0개를 완료했어요</div>
+        <div
+          className='bottom-sheet__drag-area'
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
+        >
+          <div className='bottom-sheet__handle' />
         </div>
 
-        <div className='bottomSheet__header__icons'>
-          <Icon
-            name='icon-story'
-            width={44}
-            height={44}
-            className='bottomSheet__header__icons--icon'
-          />
+        <div className='bottomSheet__header'>
+          <div className='bottomSheet__header__text'>
+            <div className='bottomSheet__header__text--title'>도감</div>
 
-          <Icon
-            name='icon-streak'
-            width={44}
-            height={44}
-            className='bottomSheet__header__icons--icon'
-          />
+            <div className='bottomSheet__header__text--description'>10개 중 0개 모았어요</div>
+          </div>
+
+          <div className='bottomSheet__header__icons'>
+            <div className='bottomSheet__header__icons--point'>100P</div>
+
+            <Icon
+              name='icon-setting'
+              width={44}
+              height={44}
+              className='bottomSheet__header__icons--icon'
+              onClick={() => navigate('/setting')}
+            />
+          </div>
+        </div>
+        <div className='catalog__content'>
+          <div className='catalog__grid'>
+            {avatarItems.map((item) => (
+              <div
+                className={`catalog__item ${!item.unlocked ? 'locked' : ''}`}
+                key={item.id}
+                onClick={() => handleItemClick(item.id)}
+              >
+                <img src={item.image} alt={`아이템 ${item.id}`} className='catalog__item__image' />
+
+                {item.equipped && (
+                  <div className='catalog__item__equipped'>
+                    <Icon name='equip-icon' width={30} height={30} />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+      <ItemUnlockModal
+        isOpen={selectedLockedItem !== null}
+        item={selectedLockedItem}
+        onClose={handleCloseUnlockModal}
+        onConfirm={handleUnlockItem}
+      />
+    </>
   )
 }
 

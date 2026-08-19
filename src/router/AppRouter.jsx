@@ -15,7 +15,7 @@ import VerificationPage from '../pages/verification-page/VerificationPage'
 
 export const AppRouter = createBrowserRouter([
   {
-    path: '/onboarding',
+    path: '/',
     element: <OnboardingPage />,
   },
   {
