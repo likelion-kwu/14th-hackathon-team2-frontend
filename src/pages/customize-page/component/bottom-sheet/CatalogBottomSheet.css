@@ -66,6 +66,17 @@
   display: flex;
   gap: 8px;
 }
+.bottomSheet__header__icons--point {
+  font-size: 12px;
+  display: flex;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 100px;
+  width: 44px;
+  height: 44px;
+  color: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+}
 
 .catalog__content {
   padding: 30px 21px;
