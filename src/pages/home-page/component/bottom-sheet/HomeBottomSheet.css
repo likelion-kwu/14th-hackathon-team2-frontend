@@ -1,17 +1,17 @@
 .bottom-sheet {
-  display: flex;
-  flex-direction: column;
   position: absolute;
   top: 20px;
   left: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
   width: 100%;
   height: 100%;
   overflow: hidden;
   box-sizing: border-box;
   background-color: var(--color-white);
   border-radius: 50px 50px 0 0;
-  box-shadow: 0px -5px 20px 0px rgba(0, 0, 0, 0.05);
-  z-index: 20;
+  box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.05);
   transition: transform 0.35s ease;
 }
 
@@ -21,8 +21,8 @@
 
 .bottom-sheet__drag-area {
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   flex-shrink: 0;
   width: 100%;
   height: 30px;
@@ -64,15 +64,17 @@
 }
 
 .bottomSheet__content {
+  position: relative;
+  z-index: 1;
   flex: 1;
   width: 100%;
   min-height: 0;
-  padding-bottom: 100px;
+  padding-bottom: 270px;
   overflow-y: auto;
   box-sizing: border-box;
   overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 .bottomSheet__content::-webkit-scrollbar {
@@ -92,8 +94,8 @@
   flex-direction: column;
   align-items: center;
   flex-shrink: 0;
-  width: 50px;
-  height: 600px;
+  width: 44px;
+  height: 500px;
 }
 
 .routineTimeline__start,
@@ -161,8 +163,13 @@
 }
 
 .routineTimeline__now {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
-  padding: 5px 10px;
+  height: 28px;
+  padding: 0 10px;
+  box-sizing: border-box;
   border-radius: 20px;
   background-color: #62cb68;
   color: var(--color-white);
@@ -179,9 +186,8 @@
   justify-content: space-between;
   min-width: 0;
   height: 500px;
-  margin-left: 12px;
+  margin-left: 8px;
   padding: 66px 0 50px;
-  gap: 0;
   box-sizing: border-box;
 }
 
@@ -191,9 +197,9 @@
   width: 100%;
   height: 64px;
   padding: 0 14px 0 18px;
-  border-radius: 18px;
   box-sizing: border-box;
-  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.05);
+  border-radius: 18px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
 }
 
 .routineCard--skin {
@@ -212,6 +218,10 @@
   background: linear-gradient(90deg, #ffffff 48%, rgba(211, 71, 111, 0.12) 100%);
 }
 
+.routineCard--completed {
+  background: linear-gradient(90deg, #ffffff 48%, rgba(117, 198, 255, 0.25) 100%);
+}
+
 .routineCard__check {
   flex-shrink: 0;
   width: 20px;
@@ -222,6 +232,24 @@
   appearance: none;
   background-color: #ffffff;
   cursor: pointer;
+}
+
+.routineCard__check--completed {
+  position: relative;
+  border: none;
+  background-color: #65c96b;
+}
+
+.routineCard__check--completed::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 7px;
+  width: 5px;
+  height: 9px;
+  border-right: 2px solid #ffffff;
+  border-bottom: 2px solid #ffffff;
+  transform: rotate(45deg);
 }
 
 .routineCard__text {
@@ -260,28 +288,6 @@
   object-fit: contain;
 }
 
-.routineCard--completed {
-  background: linear-gradient(90deg, #ffffff 48%, rgba(117, 198, 255, 0.25) 100%);
-}
-
-.routineCard__check--completed {
-  position: relative;
-  border: none;
-  background-color: #65c96b;
-}
-
-.routineCard__check--completed::after {
-  content: '';
-  position: absolute;
-  top: 4px;
-  left: 7px;
-  width: 5px;
-  height: 9px;
-  border-right: 2px solid #ffffff;
-  border-bottom: 2px solid #ffffff;
-  transform: rotate(45deg);
-}
-
 .routineCard__reward-button {
   flex-shrink: 0;
   height: 38px;
@@ -296,4 +302,425 @@
   font-weight: 500;
   white-space: nowrap;
   cursor: pointer;
+}
+
+.todoSection {
+  width: 100%;
+  padding: 38px 30px 0;
+  box-sizing: border-box;
+}
+
+.todoSection__header {
+  display: flex;
+  flex-direction: column;
+}
+
+.todoSection__title {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.9);
+  font-size: 20px;
+  font-weight: var(--font-weight-semibold);
+  line-height: 130%;
+}
+
+.todoSection__description {
+  margin: 7px 0 0;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 130%;
+}
+
+.todoList {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-top: 28px;
+  gap: 14px;
+}
+
+.todoCard {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 64px;
+  padding: 0 18px;
+  box-sizing: border-box;
+  border-radius: 18px;
+  background-color: #ffffff;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+}
+
+.todoCard--completed {
+  background: linear-gradient(90deg, #ffffff 48%, rgba(117, 198, 255, 0.25) 100%);
+}
+
+.todoCard__check {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  border-radius: 50%;
+  appearance: none;
+  background-color: #ffffff;
+  cursor: pointer;
+}
+
+.todoCard__check--completed {
+  position: relative;
+  border: none;
+  background-color: #65c96b;
+}
+
+.todoCard__check--completed::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 7px;
+  width: 5px;
+  height: 9px;
+  border-right: 2px solid #ffffff;
+  border-bottom: 2px solid #ffffff;
+  transform: rotate(45deg);
+}
+
+.todoCard__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  margin-left: 18px;
+}
+
+.todoCard__time {
+  overflow: hidden;
+  color: rgba(0, 0, 0, 0.4);
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 120%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.todoCard__title {
+  overflow: hidden;
+  margin-top: 3px;
+  color: rgba(0, 0, 0, 0.85);
+  font-size: 13px;
+  font-weight: var(--font-weight-semibold);
+  line-height: 120%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.todoCard__reward-button {
+  flex-shrink: 0;
+  height: 38px;
+  margin-left: auto;
+  padding: 0 18px;
+  border: none;
+  border-radius: 20px;
+  background-color: #74c3f8;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.recommendedRoutine {
+  position: absolute;
+  right: 0;
+  bottom: 170px;
+  left: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 66px;
+  box-sizing: border-box;
+  isolation: isolate;
+  opacity: var(--recommendation-opacity, 0);
+  transform: translateY(var(--recommendation-offset-y, 0));
+  transition:
+    transform 0.35s ease,
+    opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.bottom-sheet.dragging .recommendedRoutine {
+  transition: none;
+}
+
+.bottom-sheet--closed:not(.dragging) .recommendedRoutine__list {
+  pointer-events: none;
+}
+
+.recommendedRoutine::before {
+  content: '';
+  position: absolute;
+  top: -85px;
+  right: 0;
+  bottom: -150px;
+  left: 0;
+  z-index: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(223, 243, 255, 0) 0%,
+    rgba(223, 243, 255, 0.75) 55%,
+    #dff3ff 100%
+  );
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  mask-image: linear-gradient(to bottom, transparent 0, black 80px, black 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, black 80px, black 100%);
+  pointer-events: none;
+}
+
+.recommendedRoutine__list {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  width: 100%;
+  padding: 0 20px;
+  gap: 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  box-sizing: border-box;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: 20px;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+  isolation: isolate;
+  pointer-events: auto;
+  cursor: grab;
+  user-select: none;
+}
+
+.recommendedRoutine__list--dragging {
+  scroll-snap-type: none;
+  cursor: grabbing;
+}
+
+.recommendedRoutine__list::-webkit-scrollbar {
+  display: none;
+}
+
+.recommendedRoutineCard {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  flex: 0 0 280px;
+  width: 280px;
+  height: 66px;
+  padding: 0 16px 0 9px;
+  overflow: hidden;
+  box-sizing: border-box;
+  border-radius: 33px;
+  background-color: #ffffff;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  scroll-snap-align: start;
+  isolation: isolate;
+  transform: translateZ(0);
+  opacity: 1;
+  filter: none;
+  -webkit-filter: none;
+}
+
+.recommendedRoutineCard--skin {
+  --recommended-color: #256af4;
+  --recommended-background: #e7ecff;
+}
+
+.recommendedRoutineCard--wellbeing {
+  --recommended-color: #ff7733;
+  --recommended-background: #ffeadf;
+}
+
+.recommendedRoutineCard--diet {
+  --recommended-color: #7e55f6;
+  --recommended-background: #eee7ff;
+}
+
+.recommendedRoutineCard--health {
+  --recommended-color: #eb4770;
+  --recommended-background: #ffe5ec;
+}
+
+.recommendedRoutineCard__character-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: var(--recommended-background);
+}
+
+.recommendedRoutineCard__character {
+  position: relative;
+  z-index: 1;
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  opacity: 1;
+  filter: none;
+  -webkit-filter: none;
+}
+
+.recommendedRoutineCard__text {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  margin-left: 10px;
+  opacity: 1;
+  filter: none;
+}
+
+.recommendedRoutineCard__category {
+  overflow: hidden;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 120%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recommendedRoutineCard__title {
+  overflow: hidden;
+  margin-top: 2px;
+  color: rgba(0, 0, 0, 0.85);
+  font-size: 13px;
+  font-weight: var(--font-weight-semibold);
+  line-height: 120%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recommendedRoutineCard__add-button {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  height: 32px;
+  margin-left: auto;
+  padding: 0 13px;
+  gap: 5px;
+  border: none;
+  border-radius: 18px;
+  background-color: var(--recommended-color);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 1;
+  filter: none;
+  cursor: pointer;
+}
+
+.recommendedRoutineCard__add-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 13px;
+  height: 13px;
+  border: 1px solid #ffffff;
+  border-radius: 3px;
+  box-sizing: border-box;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 100%;
+}
+
+.pointToast {
+  position: absolute;
+  right: 0;
+  bottom: 250px;
+  left: 0;
+  z-index: 300;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  transform: translateY(var(--recommendation-offset-y, 0));
+  transition: transform 0.35s ease;
+  pointer-events: none;
+}
+
+.bottom-sheet.dragging .pointToast {
+  transition: none;
+}
+
+.pointToast__content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 138px;
+  height: 40px;
+  padding: 0 14px 0 8px;
+  gap: 8px;
+  box-sizing: border-box;
+  border-radius: 22px;
+  background-color: rgba(71, 84, 93, 0.78);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: pointToastShow 2s ease forwards;
+}
+
+.pointToast__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background-color: #5badf8;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 300;
+  line-height: 100%;
+}
+
+.pointToast__message {
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 100%;
+  white-space: nowrap;
+}
+
+@keyframes pointToastShow {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+
+  15% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  82% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(4px) scale(0.98);
+  }
 }
