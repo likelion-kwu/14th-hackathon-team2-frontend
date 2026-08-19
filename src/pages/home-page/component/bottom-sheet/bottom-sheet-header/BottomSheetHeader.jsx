@@ -1,5 +1,5 @@
 import { Icon } from '../../../../../components/icon/Icon'
-import Achievement from '../../../Streak-achievement-popup/Achievement'
+import Achievement from '../../../Streak-achievement-popup/achievement.jsx'
 
 import './BottomSheetHeader.css'
 
