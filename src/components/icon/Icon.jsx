@@ -10,7 +10,6 @@ export const Icon = ({ name, width, height, className = '', ...props }) => {
     return null
   }
 
-  console.log(name)
   return (
     <Suspense fallback={null}>
       <SvgIcon width={width} height={height} className={className} {...props} />
