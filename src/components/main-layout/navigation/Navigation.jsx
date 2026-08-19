@@ -18,17 +18,18 @@ function Navigation() {
       disabledIcon: 'navigation-reflec-disabled',
     },
     {
+      path: '/routine',
+      activeIcon: 'navigation-routine-active',
+      disabledIcon: 'navigation-routine-disabled',
+    },
+    {
       path: '/ranking',
       activeIcon: 'navigation-rank-active',
       disabledIcon: 'navigation-rank-disabled',
     },
     {
       path: '/customize',
-      activeIcon: 'navigation-custom-active',
-      disabledIcon: 'navigation-custom-disabled',
-    },
-    {
-      path: '/setting',
+      activePaths: ['/customize', '/setting'],
       activeIcon: 'navigation-custom-active',
       disabledIcon: 'navigation-custom-disabled',
     },
@@ -38,7 +39,9 @@ function Navigation() {
     <div className='navigation__page'>
       <nav className='navigation__container'>
         {navigationItems.map((item) => {
-          const isActive = location.pathname === item.path
+          const isActive = item.activePaths
+            ? item.activePaths.includes(location.pathname)
+            : location.pathname === item.path
 
           return (
             <button
