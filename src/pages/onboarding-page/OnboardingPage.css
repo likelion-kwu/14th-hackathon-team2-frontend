@@ -29,6 +29,21 @@
 
   width: min(78%, 314px);
   height: auto;
+
+  position: relative;
+  animation: filaby-float 3s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes filaby-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-13px);
+  }
 }
 
 .onboarding-page__text {
