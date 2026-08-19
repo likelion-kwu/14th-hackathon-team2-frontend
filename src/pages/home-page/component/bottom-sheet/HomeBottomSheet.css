@@ -87,15 +87,13 @@
   box-sizing: border-box;
 }
 
-/* 시간선 */
-
 .routineTimeline {
   display: flex;
   flex-direction: column;
   align-items: center;
   flex-shrink: 0;
   width: 50px;
-  height: 456px;
+  height: 600px;
 }
 
 .routineTimeline__start,
@@ -174,16 +172,17 @@
   white-space: nowrap;
 }
 
-/* 루틴 카드 */
-
 .routineList {
   display: flex;
   flex: 1;
   flex-direction: column;
+  justify-content: space-between;
   min-width: 0;
+  height: 500px;
   margin-left: 12px;
-  padding-top: 44px;
-  gap: 12px;
+  padding: 66px 0 50px;
+  gap: 0;
+  box-sizing: border-box;
 }
 
 .routineCard {
