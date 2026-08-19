@@ -1,0 +1,319 @@
+.verificationPage {
+  position: relative;
+  width: 100%;
+  max-width: 450px;
+  min-height: 100svh;
+  margin: 0 auto;
+  overflow: hidden;
+  background-color: #eeeeee;
+  background-image:
+    linear-gradient(45deg, #ffffff 25%, transparent 25%),
+    linear-gradient(-45deg, #ffffff 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #ffffff 75%),
+    linear-gradient(-45deg, transparent 75%, #ffffff 75%);
+  background-position:
+    0 0,
+    0 30px,
+    30px -30px,
+    -30px 0;
+  background-size: 60px 60px;
+}
+
+.verificationPage__camera {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.verificationPage__video,
+.verificationPage__captured-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.verificationPage__camera-error {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  padding: 10px 16px;
+  border-radius: 20px;
+  background-color: rgba(0, 0, 0, 0.55);
+  color: #ffffff;
+  font-size: 13px;
+  white-space: nowrap;
+  transform: translate(-50%, -50%);
+}
+
+.verificationPage__header {
+  position: absolute;
+  top: 70px;
+  right: 0;
+  left: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+}
+
+.verificationPage__back-button {
+  position: absolute;
+  left: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+  color: #111111;
+  cursor: pointer;
+}
+
+.verificationPage__title {
+  margin: 0;
+  color: #111111;
+  font-size: 16px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.verificationPage__routine {
+  position: absolute;
+  top: 125px;
+  right: 20px;
+  left: 20px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  height: 64px;
+  padding: 0 8px;
+  border-radius: 32px;
+  box-sizing: border-box;
+  background-color: #ffffff;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+}
+
+.verificationPage__character-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+}
+
+.verificationPage__character-area--skin {
+  background-color: #e7ecff;
+}
+
+.verificationPage__character-area--wellbeing {
+  background-color: #ffeadf;
+}
+
+.verificationPage__character-area--diet {
+  background-color: #eee7ff;
+}
+
+.verificationPage__character-area--health {
+  background-color: #ffe5ec;
+}
+
+.verificationPage__character {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+}
+
+.verificationPage__routine-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  margin-left: 10px;
+}
+
+.verificationPage__category {
+  overflow: hidden;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 11px;
+  line-height: 120%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.verificationPage__routine-title {
+  overflow: hidden;
+  margin-top: 2px;
+  color: #111111;
+  font-size: 14px;
+  font-weight: var(--font-weight-semibold);
+  line-height: 120%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.verificationPage__status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  margin-left: auto;
+  border-radius: 50%;
+  color: #ffffff;
+}
+
+.verificationPage__status--verifying {
+  gap: 4px;
+  background-color: #256af4;
+}
+
+.verificationPage__status--verifying span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.8);
+  animation: verification-dot 900ms ease-in-out infinite;
+}
+
+.verificationPage__status--verifying span:nth-child(2) {
+  animation-delay: 150ms;
+}
+
+.verificationPage__status--verifying span:nth-child(3) {
+  animation-delay: 300ms;
+}
+
+.verificationPage__status--success {
+  background-color: #34c759;
+}
+
+.verificationPage__status--failure {
+  background-color: #ff3333;
+}
+
+.verificationPage__failure-popup {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 20;
+  width: calc(100% - 100px);
+  max-width: 300px;
+  padding: 25px 22px 20px;
+  border-radius: 25px;
+  box-sizing: border-box;
+  background-color: #ffffff;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08);
+  transform: translate(-50%, -50%);
+}
+
+.verificationPage__failure-title {
+  margin: 0;
+  color: #111111;
+  font-size: 18px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.verificationPage__failure-description {
+  margin: 10px 0 0;
+  color: rgba(0, 0, 0, 0.5);
+  font-size: 13px;
+  line-height: 160%;
+}
+
+.verificationPage__failure-confirm {
+  display: block;
+  margin: 10px 0 0 auto;
+  padding: 5px 0;
+  border: none;
+  background-color: transparent;
+  color: #55b9f5;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+
+.verificationPage__controls {
+  position: absolute;
+  right: 0;
+  bottom: 145px;
+  left: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80px;
+}
+
+.verificationPage__capture-button {
+  width: 72px;
+  height: 72px;
+  padding: 0;
+  border: 4px solid #777777;
+  border-radius: 50%;
+  box-sizing: border-box;
+  background-color: #ffffff;
+  cursor: pointer;
+}
+
+.verificationPage__capture-button:active {
+  transform: scale(0.96);
+}
+
+.verificationPage__capture-button:disabled,
+.verificationPage__gallery-button:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+
+.verificationPage__gallery-button {
+  position: absolute;
+  left: calc(50% + 80px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background-color: rgba(80, 80, 80, 0.75);
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.verificationPage__file-input {
+  display: none;
+}
+
+@keyframes verification-dot {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: translateY(0);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+}
+
+@media (max-height: 700px) {
+  .verificationPage__header {
+    top: 45px;
+  }
+
+  .verificationPage__routine {
+    top: 100px;
+  }
+
+  .verificationPage__controls {
+    bottom: 125px;
+  }
+}

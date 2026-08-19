@@ -109,3 +109,6 @@
   white-space: nowrap;
   cursor: pointer;
 }
+.routineCard__check:disabled {
+  cursor: default;
+}
