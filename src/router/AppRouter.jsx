@@ -37,6 +37,7 @@ export const AppRouter = createBrowserRouter([
     path: '/',
     element: <MainLayout />,
     children: [
+      { path: '', element: <HomePage /> },
       { path: 'home', element: <HomePage /> },
       { path: 'reflection', element: <ReflectionPage /> },
       { path: 'ranking', element: <RankingPage /> },
