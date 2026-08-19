@@ -3,8 +3,10 @@ import { Icon } from '../../../../components/icon/Icon'
 import imagePlaceholder from '.././../../../assets/avatar/avatar-items/test-item.png'
 import ItemUnlockModal from '../item-unlock-modal/ItemUnlockModal'
 import './CatalogBottomSheet.css'
+import { useNavigate } from 'react-router-dom'
 
 function CatalogBottomSheet({ onDragProgress }) {
+  const navigate = useNavigate()
   const [sheetState, setSheetState] = useState('closed')
   const [dragY, setDragY] = useState(null)
 
@@ -161,18 +163,14 @@ function CatalogBottomSheet({ onDragProgress }) {
           </div>
 
           <div className='bottomSheet__header__icons'>
-            <Icon
-              name='icon-point'
-              width={44}
-              height={44}
-              className='bottomSheet__header__icons--icon'
-            />
+            <div className='bottomSheet__header__icons--point'>100P</div>
 
             <Icon
               name='icon-setting'
               width={44}
               height={44}
               className='bottomSheet__header__icons--icon'
+              onClick={() => navigate('/setting')}
             />
           </div>
         </div>

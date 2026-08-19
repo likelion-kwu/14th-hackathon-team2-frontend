@@ -18,17 +18,17 @@ function Navigation() {
       disabledIcon: 'navigation-reflec-disabled',
     },
     {
-      path: '/routine',
-      activeIcon: 'navigation-routine-active',
-      disabledIcon: 'navigation-routine-disabled',
-    },
-    {
       path: '/ranking',
       activeIcon: 'navigation-rank-active',
       disabledIcon: 'navigation-rank-disabled',
     },
     {
       path: '/customize',
+      activeIcon: 'navigation-custom-active',
+      disabledIcon: 'navigation-custom-disabled',
+    },
+    {
+      path: '/setting',
       activeIcon: 'navigation-custom-active',
       disabledIcon: 'navigation-custom-disabled',
     },

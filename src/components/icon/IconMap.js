@@ -35,6 +35,7 @@ import rankProfile from '../../assets/rank-page/rank-profile.svg?react'
 
 import chatBubbleArrow from '../../assets/avatar/chat-bubble-arrow.svg?react'
 import equipIcon from '../../assets/avatar/avatar-items/equip-icon.svg?react'
+import backArrow from '../../assets/icons/icons-another/icons-arrow.svg?react'
 
 export const iconMap = {
   // Navigation Bar Icons
@@ -74,4 +75,5 @@ export const iconMap = {
 
   'chat-bubble-arrow': chatBubbleArrow,
   'equip-icon': equipIcon,
+  'back-arrow': backArrow,
 }

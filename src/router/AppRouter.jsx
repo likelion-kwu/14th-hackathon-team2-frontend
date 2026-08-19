@@ -10,6 +10,7 @@ import ReflectionPage from '../pages/reflection-page/entry/ReflectionPage'
 import RankingPage from '../pages/ranking-page/entry/RankingPage'
 import CustomizePage from '../pages/customize-page/entry/CustomizePage'
 import HomePage from '../pages/home-page/entry/HomePage'
+import SettingPage from '../pages/setting-page/entry/SettingPage'
 
 export const AppRouter = createBrowserRouter([
   {
@@ -38,9 +39,9 @@ export const AppRouter = createBrowserRouter([
     children: [
       { path: 'home', element: <HomePage /> },
       { path: 'reflection', element: <ReflectionPage /> },
-      { path: 'routine', element: <div>routine</div> },
       { path: 'ranking', element: <RankingPage /> },
       { path: 'customize', element: <CustomizePage /> },
+      { path: 'setting', element: <SettingPage /> },
     ],
   },
   { path: '*', element: <div>404 Not Found</div> },
