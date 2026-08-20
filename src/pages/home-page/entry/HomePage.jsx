@@ -1,18 +1,103 @@
-import { useState, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+
 import './HomePage.css'
+
+import { getHome, getDailyRoutines } from '../../../api/homeApi'
+import { getCurrentUser } from '../../../api/userApi'
+
 import ChatBubble from '../../../components/chat-bubble/ChatBubble'
-import dummy from '../../../assets/avatar/avatar-default/dummy.png'
 import HomeBottomSheet from '../component/bottom-sheet/HomeBottomSheet'
+
+import dummy from '../../../assets/avatar/avatar-default/dummy.png'
+
+import {
+  createRoutineCardData,
+  createTodoCardData,
+} from '../component/bottom-sheet/homeBottomSheetData'
 
 function HomePage() {
   const [sheetProgress, setSheetProgress] = useState(0)
   const [isChatVisible, setIsChatVisible] = useState(false)
   const [chatContent, setChatContent] = useState('')
 
+  const [nickname, setNickname] = useState('')
+  const [routines, setRoutines] = useState([])
+  const [todos, setTodos] = useState([])
+  const [progress, setProgress] = useState({
+    completedCount: 0,
+    totalCount: 0,
+  })
+  const [achievementData, setAchievementData] = useState({
+    streak: 0,
+    completedDays: 0,
+  })
+
   const chatTimerRef = useRef(null)
 
   const avatarHeight = 400 - sheetProgress * 100
   const avatarTranslateY = -sheetProgress * 30
+
+  useEffect(() => {
+    let isMounted = true
+
+    const loadHomeData = async () => {
+      try {
+        const [user, home, dailyRoutineData] = await Promise.all([
+          getCurrentUser(),
+          getHome(),
+          getDailyRoutines(),
+        ])
+
+        if (!isMounted) return
+
+        const homeRoutineMap = new Map(
+          home.routines.map((routine) => [routine.dailyRoutineId, routine]),
+        )
+
+        const regularRoutines = []
+        const todoRoutines = []
+
+        dailyRoutineData.routines.forEach((dailyRoutine) => {
+          if (dailyRoutine.category === 'TO_DO') {
+            todoRoutines.push(createTodoCardData(dailyRoutine))
+            return
+          }
+
+          regularRoutines.push(
+            createRoutineCardData(dailyRoutine, homeRoutineMap.get(dailyRoutine.id)),
+          )
+        })
+
+        setNickname(user.nickname ?? '')
+        setRoutines(regularRoutines)
+        setTodos(todoRoutines)
+
+        setProgress({
+          completedCount: home.progress.completedCount,
+          totalCount: home.progress.totalCount,
+        })
+
+        setAchievementData({
+          streak: home.success.currentStreakDays,
+          completedDays: Math.min(home.success.currentStreakDays, 7),
+        })
+      } catch (error) {
+        console.error(error)
+
+        alert(error.message ?? '홈 정보를 불러오지 못했습니다.')
+      }
+    }
+
+    loadHomeData()
+
+    return () => {
+      isMounted = false
+
+      if (chatTimerRef.current) {
+        clearTimeout(chatTimerRef.current)
+      }
+    }
+  }, [])
 
   const dummyMessages = [
     '오늘도 같이 해볼까요?',
@@ -24,9 +109,8 @@ function HomePage() {
 
   const handleAvatarClick = () => {
     const randomIndex = Math.floor(Math.random() * dummyMessages.length)
-    const message = dummyMessages[randomIndex]
 
-    setChatContent(message)
+    setChatContent(dummyMessages[randomIndex])
     setIsChatVisible(true)
 
     if (chatTimerRef.current) {
@@ -47,7 +131,7 @@ function HomePage() {
           maxHeight: `${40 * (1 - sheetProgress)}px`,
         }}
       >
-        반가워요, --님
+        반가워요, {nickname || '--'}님
       </div>
 
       <div
@@ -59,6 +143,7 @@ function HomePage() {
         <img
           src={dummy}
           className='home__avatar'
+          alt='내 아바타'
           onClick={handleAvatarClick}
           style={{
             height: `${avatarHeight}px`,
@@ -68,7 +153,13 @@ function HomePage() {
         {isChatVisible && <ChatBubble content={chatContent} />}
       </div>
 
-      <HomeBottomSheet onDragProgress={setSheetProgress} />
+      <HomeBottomSheet
+        routines={routines}
+        todos={todos}
+        progress={progress}
+        achievementData={achievementData}
+        onDragProgress={setSheetProgress}
+      />
     </div>
   )
 }
