@@ -5,7 +5,7 @@ import RecommendedRoutineCard from '../recommended-routine-card/RecommendedRouti
 
 import './RecommendedRoutine.css'
 
-function RecommendedRoutine({ routines, progress }) {
+function RecommendedRoutine({ routines, progress, onAddRoutine }) {
   const listRef = useRef(null)
   const startXRef = useRef(0)
   const startScrollLeftRef = useRef(0)
@@ -71,7 +71,7 @@ function RecommendedRoutine({ routines, progress }) {
         onDragStart={(event) => event.preventDefault()}
       >
         {routines.map((routine) => (
-          <RecommendedRoutineCard key={routine.id} routine={routine} />
+          <RecommendedRoutineCard key={routine.id} routine={routine} onAdd={onAddRoutine} />
         ))}
       </div>
     </section>,

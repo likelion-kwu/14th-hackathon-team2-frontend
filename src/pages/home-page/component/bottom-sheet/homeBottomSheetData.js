@@ -82,39 +82,25 @@ export function createTodoCardData(dailyRoutine) {
   }
 }
 
-/*
- * 추천 루틴은 다음 단계에서 API 데이터로 교체한다.
- */
-export const RECOMMENDED_ROUTINES = [
-  {
-    id: 1,
-    category: 'Skin',
-    title: '외출 전 선크림 바르기',
-    theme: 'skin',
-    characterImage: imageSkin,
-  },
-  {
-    id: 2,
-    category: 'Well-being',
-    title: '잠들기 전 명상하기',
-    theme: 'wellbeing',
-    characterImage: imageWellbeing,
-  },
-  {
-    id: 3,
-    category: 'Diet',
-    title: '하루 물 2L 마시기',
-    theme: 'diet',
-    characterImage: imageDiet,
-  },
-  {
-    id: 4,
-    category: 'Health & Fit',
-    title: '가볍게 스트레칭하기',
-    theme: 'health',
-    characterImage: imageHealth,
-  },
-]
+export function createRecommendedRoutineCardData(recommendation) {
+  const categoryMeta = CATEGORY_META[recommendation.category] ?? DEFAULT_CATEGORY_META
+
+  return {
+    id: recommendation.code,
+    code: recommendation.code,
+
+    categoryCode: recommendation.category,
+    category: categoryMeta.label,
+
+    content: recommendation.content,
+    title: recommendation.content,
+
+    theme: categoryMeta.theme,
+    characterImage: categoryMeta.characterImage,
+
+    recommendedVerificationObject: recommendation.recommendedVerificationObject,
+  }
+}
 
 export const TIMELINE_IMAGES = {
   sun: imageSun,

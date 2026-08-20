@@ -1,10 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
+import { useOutletContext } from 'react-router-dom'
 
 import './HomePage.css'
 
-import { getHome, getDailyRoutines } from '../../../api/homeApi'
-import { getCurrentUser } from '../../../api/userApi'
 import { getAvatarImage, selectAvatarDialogue } from '../../../api/avatarApi'
+import { getDailyRoutines, getHome } from '../../../api/homeApi'
+import {
+  getRoutineRecommendations,
+  ROUTINE_RECOMMENDATION_CATEGORIES,
+} from '../../../api/routineApi'
+import { getCurrentUser } from '../../../api/userApi'
 
 import ChatBubble from '../../../components/chat-bubble/ChatBubble'
 import HomeBottomSheet from '../component/bottom-sheet/HomeBottomSheet'
@@ -12,6 +17,7 @@ import HomeBottomSheet from '../component/bottom-sheet/HomeBottomSheet'
 import dummy from '../../../assets/avatar/avatar-default/dummy.png'
 
 import {
+  createRecommendedRoutineCardData,
   createRoutineCardData,
   createTodoCardData,
 } from '../component/bottom-sheet/homeBottomSheetData'
@@ -42,7 +48,18 @@ function getDialogueSituation(routines, progress, achievementData) {
   return 'RETURN_AFTER_ABSENCE'
 }
 
+function getRecommendationArray(response) {
+  if (Array.isArray(response)) return response
+  if (Array.isArray(response?.data)) {
+    return response.data
+  }
+
+  return []
+}
+
 function HomePage() {
+  const { openRoutinePlus, isRoutinePlusOpen, homeRefreshKey } = useOutletContext()
+
   const [sheetProgress, setSheetProgress] = useState(0)
   const [isChatVisible, setIsChatVisible] = useState(false)
   const [isDialogueLoading, setIsDialogueLoading] = useState(false)
@@ -53,6 +70,7 @@ function HomePage() {
 
   const [routines, setRoutines] = useState([])
   const [todos, setTodos] = useState([])
+  const [recommendedRoutines, setRecommendedRoutines] = useState([])
 
   const [progress, setProgress] = useState({
     completedCount: 0,
@@ -118,6 +136,7 @@ function HomePage() {
         })
       } catch (error) {
         console.error(error)
+
         alert(error.message ?? '홈 정보를 불러오지 못했습니다.')
       }
     }
@@ -127,7 +146,39 @@ function HomePage() {
     return () => {
       isMounted = false
     }
-  }, [])
+  }, [homeRefreshKey])
+
+  useEffect(() => {
+    let isMounted = true
+
+    const loadRecommendedRoutines = async () => {
+      try {
+        const recommendationGroups = await Promise.all(
+          ROUTINE_RECOMMENDATION_CATEGORIES.map((category) => getRoutineRecommendations(category)),
+        )
+
+        if (!isMounted) return
+
+        const recommendations = recommendationGroups.flatMap((group) =>
+          getRecommendationArray(group).slice(0, 1),
+        )
+
+        setRecommendedRoutines(recommendations.map(createRecommendedRoutineCardData))
+      } catch (error) {
+        console.error('추천 루틴을 불러오지 못했습니다.', error)
+
+        if (isMounted) {
+          setRecommendedRoutines([])
+        }
+      }
+    }
+
+    loadRecommendedRoutines()
+
+    return () => {
+      isMounted = false
+    }
+  }, [homeRefreshKey])
 
   useEffect(() => {
     let objectUrl = ''
@@ -181,7 +232,7 @@ function HomePage() {
 
       const dialogue = await selectAvatarDialogue(situation)
 
-      if (dialogue.content) {
+      if (dialogue?.content) {
         message = dialogue.content
       }
     } catch (error) {
@@ -234,6 +285,9 @@ function HomePage() {
         todos={todos}
         progress={progress}
         achievementData={achievementData}
+        recommendedRoutines={recommendedRoutines}
+        isRoutinePlusOpen={isRoutinePlusOpen}
+        onRecommendedRoutineAdd={openRoutinePlus}
         onDragProgress={setSheetProgress}
       />
     </div>

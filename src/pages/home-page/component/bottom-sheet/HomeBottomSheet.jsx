@@ -9,11 +9,20 @@ import RoutineCard from './routine-card/RoutineCard'
 import RoutineTimeline from './routine-timeline/RoutineTimeline'
 import TodoSection from './todo-section/TodoSection'
 
-import { RECOMMENDED_ROUTINES, TIMELINE_IMAGES } from './homeBottomSheetData'
+import { TIMELINE_IMAGES } from './homeBottomSheetData'
 
 import './HomeBottomSheet.css'
 
-function HomeBottomSheet({ onDragProgress, achievementData, routines = [], todos = [], progress }) {
+function HomeBottomSheet({
+  onDragProgress,
+  achievementData,
+  routines = [],
+  todos = [],
+  progress,
+  recommendedRoutines = [],
+  onRecommendedRoutineAdd,
+  isRoutinePlusOpen = false,
+}) {
   const [sheetState, setSheetState] = useState('closed')
   const [dragY, setDragY] = useState(null)
   const [pointToast, setPointToast] = useState(null)
@@ -106,7 +115,9 @@ function HomeBottomSheet({ onDragProgress, achievementData, routines = [], todos
 
   const completedTodoCount = todos.filter((todo) => todo.isCompleted).length
 
-  const isPopupOpen = isEpisodeOpen || isAchievementOpen
+  const isPopupOpen = isEpisodeOpen || isAchievementOpen || isRoutinePlusOpen
+
+  const recommendationOpacity = isPopupOpen ? 0 : recommendationProgress
 
   return (
     <div
@@ -114,7 +125,7 @@ function HomeBottomSheet({ onDragProgress, achievementData, routines = [], todos
       style={{
         transform: `translateY(${currentTranslate}px)`,
         '--fixed-layer-offset-y': `${-currentTranslate}px`,
-        '--recommendation-opacity': isPopupOpen ? 0 : recommendationProgress,
+        '--recommendation-opacity': recommendationOpacity,
       }}
     >
       <div
@@ -153,12 +164,17 @@ function HomeBottomSheet({ onDragProgress, achievementData, routines = [], todos
         />
       </div>
 
-      <div className='recommendedRoutineBackdrop' aria-hidden='true' />
+      {recommendedRoutines.length > 0 && (
+        <>
+          <div className='recommendedRoutineBackdrop' aria-hidden='true' />
 
-      <RecommendedRoutine
-        routines={RECOMMENDED_ROUTINES}
-        progress={isPopupOpen ? 0 : recommendationProgress}
-      />
+          <RecommendedRoutine
+            routines={recommendedRoutines}
+            progress={recommendationOpacity}
+            onAddRoutine={onRecommendedRoutineAdd}
+          />
+        </>
+      )}
 
       {pointToast && <PointToast key={pointToast.id} point={pointToast.point} />}
 
