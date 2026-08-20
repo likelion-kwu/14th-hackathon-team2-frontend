@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
+import { createAvatar } from '../../api/avatarApi'
 import { getSpeechStyle, updateSpeechStyle } from '../../api/speechStyleApi'
 
 import MainTitle from '../../components/initial-page-title/MainTitle'
@@ -43,10 +44,13 @@ function AvatarSettingPage() {
   const isCustomizeMode =
     location.state?.fromCustomize === true || searchParams.get('from') === 'customize'
 
+  const growthTrack = location.state?.growthTrack
+
   const [isPopupOpen, setIsPopupOpen] = useState(false)
   const [isCameraLoading, setIsCameraLoading] = useState(false)
   const [cameraStream, setCameraStream] = useState(null)
 
+  const [isAvatarSaving, setIsAvatarSaving] = useState(false)
   const [isSpeechLoading, setIsSpeechLoading] = useState(false)
   const [isSpeechSaving, setIsSpeechSaving] = useState(false)
 
@@ -117,11 +121,15 @@ function AvatarSettingPage() {
   }, [cameraStream])
 
   const handleBack = () => {
+    if (isAvatarSaving || isSpeechSaving) return
+
     navigate(isCustomizeMode ? '/customize' : '/tracksetting')
   }
 
   const handleOpenPopup = async () => {
-    if (isCameraLoading) return
+    if (isCameraLoading || isAvatarSaving || isSpeechSaving) {
+      return
+    }
 
     if (!window.isSecureContext) {
       alert('카메라는 HTTPS 또는 localhost에서만 사용할 수 있어요.')
@@ -183,7 +191,9 @@ function AvatarSettingPage() {
 
   const handleNext = async () => {
     if (isCustomizeMode) {
-      if (isSpeechLoading || isSpeechSaving) return
+      if (isSpeechLoading || isSpeechSaving || isAvatarSaving) {
+        return
+      }
 
       const styleSettings = {
         kind: {
@@ -224,13 +234,35 @@ function AvatarSettingPage() {
       return
     }
 
-    /*
-     * 기존 온보딩 이동 기능은 그대로 유지한다.
-     * 촬영된 파일은 capturedPhoto.file에 저장된다.
-     */
+    if (!growthTrack) {
+      alert('성장 트랙을 다시 선택해 주세요.')
+      navigate('/tracksetting')
+      return
+    }
 
-    navigate('/story')
+    if (isAvatarSaving) return
+
+    setIsAvatarSaving(true)
+
+    try {
+      await createAvatar({
+        growthTrack,
+        facePhoto: capturedPhoto.file,
+      })
+
+      navigate('/story', {
+        replace: true,
+      })
+    } catch (error) {
+      console.error('아바타를 생성하지 못했습니다.', error)
+
+      alert(error.message ?? '아바타를 생성하지 못했습니다.')
+    } finally {
+      setIsAvatarSaving(false)
+    }
   }
+
+  const isPageBusy = isCameraLoading || isAvatarSaving || isSpeechLoading || isSpeechSaving
 
   return (
     <div className='avatar-setting-page'>
@@ -256,8 +288,8 @@ function AvatarSettingPage() {
             <button
               className='avatar-setting-page__generator'
               type='button'
-              disabled={isCameraLoading}
-              aria-busy={isCameraLoading}
+              disabled={isPageBusy}
+              aria-busy={isCameraLoading || isAvatarSaving}
               aria-label={capturedPhoto.url ? '사진 다시 촬영하기' : '아바타 생성용 사진 촬영하기'}
               onClick={handleOpenPopup}
             >
@@ -285,7 +317,7 @@ function AvatarSettingPage() {
                   name='speech-level'
                   value='BANMAL'
                   checked={speechLevel === 'BANMAL'}
-                  disabled={isSpeechLoading || isSpeechSaving}
+                  disabled={isPageBusy}
                   onChange={(event) => setSpeechLevel(event.target.value)}
                 />
 
@@ -298,7 +330,7 @@ function AvatarSettingPage() {
                   name='speech-level'
                   value='JONDAEMAL'
                   checked={speechLevel === 'JONDAEMAL'}
-                  disabled={isSpeechLoading || isSpeechSaving}
+                  disabled={isPageBusy}
                   onChange={(event) => setSpeechLevel(event.target.value)}
                 />
 
@@ -313,7 +345,7 @@ function AvatarSettingPage() {
                   name='response-length'
                   value='SHORT'
                   checked={sentenceLength === 'SHORT'}
-                  disabled={isSpeechLoading || isSpeechSaving}
+                  disabled={isPageBusy}
                   onChange={(event) => setSentenceLength(event.target.value)}
                 />
 
@@ -326,7 +358,7 @@ function AvatarSettingPage() {
                   name='response-length'
                   value='MEDIUM'
                   checked={sentenceLength === 'MEDIUM'}
-                  disabled={isSpeechLoading || isSpeechSaving}
+                  disabled={isPageBusy}
                   onChange={(event) => setSentenceLength(event.target.value)}
                 />
 
@@ -339,7 +371,7 @@ function AvatarSettingPage() {
                   name='response-length'
                   value='LONG'
                   checked={sentenceLength === 'LONG'}
-                  disabled={isSpeechLoading || isSpeechSaving}
+                  disabled={isPageBusy}
                   onChange={(event) => setSentenceLength(event.target.value)}
                 />
 
@@ -354,7 +386,7 @@ function AvatarSettingPage() {
                   name='speech-style'
                   value='kind'
                   checked={speechStyle === 'kind'}
-                  disabled={isSpeechLoading || isSpeechSaving}
+                  disabled={isPageBusy}
                   onChange={(event) => setSpeechStyle(event.target.value)}
                 />
 
@@ -367,7 +399,7 @@ function AvatarSettingPage() {
                   name='speech-style'
                   value='cranky'
                   checked={speechStyle === 'cranky'}
-                  disabled={isSpeechLoading || isSpeechSaving}
+                  disabled={isPageBusy}
                   onChange={(event) => setSpeechStyle(event.target.value)}
                 />
 
@@ -380,7 +412,7 @@ function AvatarSettingPage() {
                   name='speech-style'
                   value='playful'
                   checked={speechStyle === 'playful'}
-                  disabled={isSpeechLoading || isSpeechSaving}
+                  disabled={isPageBusy}
                   onChange={(event) => setSpeechStyle(event.target.value)}
                 />
 
@@ -399,8 +431,14 @@ function AvatarSettingPage() {
           <span />
         </div>
 
-        <BottomButton onClick={handleNext} disabled={isSpeechLoading || isSpeechSaving}>
-          {isCustomizeMode ? (isSpeechSaving ? '저장 중...' : '설정 저장하기') : '다음'}
+        <BottomButton onClick={handleNext} disabled={isPageBusy}>
+          {isCustomizeMode
+            ? isSpeechSaving
+              ? '저장 중...'
+              : '설정 저장하기'
+            : isAvatarSaving
+              ? '아바타 생성 중...'
+              : '다음'}
         </BottomButton>
       </footer>
 
