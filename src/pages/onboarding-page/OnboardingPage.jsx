@@ -13,7 +13,7 @@ import onboardingBar from '../../assets/onboarding-page/image-bottombar.svg'
 const NEXT_STEP_ROUTE = {
   NICKNAME_SETUP: '/inputinfor',
   AVATAR_SETUP: '/tracksetting',
-  SPEECH_STYLE_SETUP: '/avatarsetting',
+  SPEECH_STYLE_SETUP: '/tracksetting',
   HOME: '/home',
 }
 
