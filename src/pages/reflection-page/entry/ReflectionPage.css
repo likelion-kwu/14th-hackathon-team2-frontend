@@ -1,10 +1,13 @@
 .reflection__container {
   display: flex;
   flex-direction: column;
+  width: 100%;
   height: 100%;
-  padding: 50px 20px 100px;
+  padding: 50px 20px 120px;
   gap: 20px;
-  overflow-y: scroll;
+  overflow-y: auto;
+  box-sizing: border-box;
+  scrollbar-width: none;
 }
 
 .reflection__container::-webkit-scrollbar {
@@ -12,22 +15,44 @@
 }
 
 .reflection__title {
-  font-size: 25px;
+  margin: 0;
   padding-left: 5px;
+  font-size: 25px;
   font-weight: var(--font-weight-semibold);
+}
+
+.reflection__battlepass,
+.reflection__calendar {
+  width: 100%;
+  padding: 30px;
+  border-radius: 30px;
+  background-color: var(--color-white);
+  box-sizing: border-box;
 }
 
 .reflection__battlepass {
   display: flex;
   flex-direction: column;
-  background-color: var(--color-white);
-  padding: 30px;
-  border-radius: 30px;
   gap: 25px;
 }
 
+.reflection__battlepass__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .reflection__battlepass__title {
+  margin: 0;
   font-size: 20px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.reflection__battlepass__point {
+  flex-shrink: 0;
+  color: #00abff;
+  font-size: 13px;
   font-weight: var(--font-weight-semibold);
 }
 
@@ -35,41 +60,36 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
 }
 
 .reflection__battlepass__content__boxes {
   display: flex;
+  width: 100%;
   height: 95px;
 }
 
 .reflection__battlepass__content__boxes__box {
   position: relative;
-
-  width: 110px;
+  flex: 1;
+  min-width: 0;
   height: 96px;
-
   overflow: hidden;
-  animation: vibration 0.6s infinite;
+  animation: reflection-gift-vibration 0.6s infinite alternate;
 }
-@keyframes vibration {
-  from {
-    transform: rotate(2deg);
-  }
-  to {
-    transform: rotate(0deg);
-  }
+
+.reflection__battlepass__content__boxes__box svg {
+  width: 100%;
+  height: 100%;
 }
 
 .reflection__battlepass__content__boxes__box::after {
   content: '';
-
   position: absolute;
   top: -50%;
   left: -100%;
-
   width: 40%;
   height: 200%;
-
   background: linear-gradient(
     to right,
     transparent 0%,
@@ -78,38 +98,50 @@
     rgba(255, 255, 255, 0.2) 75%,
     transparent 100%
   );
-
   transform: rotate(40deg);
-
-  animation: gift-shimmer 2.5s ease-in-out infinite;
-
+  animation: reflection-gift-shimmer 2.5s ease-in-out infinite;
   pointer-events: none;
 }
 
-@keyframes gift-shimmer {
+@keyframes reflection-gift-vibration {
+  from {
+    transform: rotate(2deg);
+  }
+
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes reflection-gift-shimmer {
   0% {
     left: -100%;
   }
 
-  60% {
-    left: 150%;
-  }
-
+  60%,
   100% {
     left: 150%;
   }
 }
 
+.reflection__battlepass__content__bar {
+  display: block;
+  width: 100%;
+  height: 20px;
+}
+
 .reflection__battlepass__content__text {
-  margin-top: 15px;
   display: flex;
+  width: 100%;
+  margin-top: 15px;
 }
 
 .reflection__battlepass__content__text--box {
   display: flex;
+  flex: 1;
   flex-direction: column;
   align-items: center;
-  width: 110px;
+  min-width: 0;
 }
 
 .reflection__battlepass__content__text--title {
@@ -117,24 +149,22 @@
 }
 
 .reflection__battlepass__content__text--point {
-  font-size: 12px;
   color: rgba(0, 0, 0, 0.5);
+  font-size: 12px;
 }
 
 .reflection__calendar {
   display: flex;
   flex-direction: column;
-  background-color: var(--color-white);
-  padding: 30px;
-  border-radius: 30px;
-
   gap: 30px;
 }
 
 .reflection__calendar__title {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.8);
   font-size: 20px;
   font-weight: var(--font-weight-semibold);
-  color: rgba(0, 0, 0, 0.8);
+  line-height: 1.4;
 }
 
 .reflection__calendar__title--highlight {
@@ -142,6 +172,7 @@
 }
 
 .reflection__calendar__calendar {
+  position: relative;
   width: 100%;
 }
 
@@ -149,51 +180,104 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 12px;
   margin-bottom: 30px;
 }
 
 .reflection__calendar__calendar__month {
-  font-size: 17px;
-  width: 50px;
+  min-width: 100px;
   text-align: center;
+  font-size: 17px;
 }
 
 .reflection__calendar__calendar__arrow {
   display: flex;
   align-items: center;
   justify-content: center;
-
+  width: 32px;
+  height: 32px;
   padding: 0;
   border: none;
-
   background: none;
-  color: rgba(0, 0, 0, 0.18);
-
-  font-size: 11px;
   cursor: pointer;
 }
 
-.reflection__calendar__calendar__week {
+.reflection__calendar__calendar__week,
+.reflection__calendar__calendar__days {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
 
-  margin-bottom: 30px;
-
+.reflection__calendar__calendar__week {
+  margin-bottom: 18px;
+  color: rgba(0, 0, 0, 0.2);
   text-align: center;
   font-size: 15px;
-  color: rgba(0, 0, 0, 0.2);
 }
 
 .reflection__calendar__calendar__days {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  transition: opacity 0.2s ease;
+}
+
+.reflection__calendar__calendar__days--loading {
+  opacity: 0.35;
 }
 
 .reflection__calendar__calendar__day {
   display: flex;
   flex-direction: column;
   align-items: center;
-  font-size: 17px;
+  min-width: 0;
+  min-height: 72px;
   color: rgba(0, 0, 0, 0.5);
+  font-size: 16px;
+}
+
+.reflection__calendar__calendar__status {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+}
+
+.reflection__calendar__loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: 0;
+  color: rgba(0, 0, 0, 0.5);
+  font-size: 13px;
+  transform: translate(-50%, -50%);
+}
+
+.reflection__calendar__error {
+  margin: -8px 0 16px;
+  color: #ff3333;
+  text-align: center;
+  font-size: 13px;
+}
+
+@media (max-width: 380px) {
+  .reflection__container {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .reflection__battlepass,
+  .reflection__calendar {
+    padding: 24px 20px;
+  }
+
+  .reflection__calendar__calendar__day {
+    min-height: 66px;
+    font-size: 15px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reflection__battlepass__content__boxes__box,
+  .reflection__battlepass__content__boxes__box::after {
+    animation: none;
+  }
 }
