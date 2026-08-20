@@ -1,28 +1,58 @@
 import { useState } from 'react'
 import { Outlet } from 'react-router-dom'
 
-import Navigation from './navigation/Navigation'
 import RoutinePlusPage from '../../pages/routineplus-page/RoutinePlusPage'
+import Navigation from './navigation/Navigation'
 
 import './MainLayout.css'
 
 const MainLayout = () => {
   const [isRoutinePlusOpen, setIsRoutinePlusOpen] = useState(false)
+  const [initialRoutine, setInitialRoutine] = useState(null)
+  const [homeRefreshKey, setHomeRefreshKey] = useState(0)
 
-  const handleRoutinePlusToggle = () => {
-    setIsRoutinePlusOpen((prev) => !prev)
+  const handleRoutinePlusOpen = (routine = null) => {
+    setInitialRoutine(routine)
+    setIsRoutinePlusOpen(true)
   }
 
   const handleRoutinePlusClose = () => {
     setIsRoutinePlusOpen(false)
+    setInitialRoutine(null)
+  }
+
+  const handleRoutinePlusToggle = () => {
+    if (isRoutinePlusOpen) {
+      handleRoutinePlusClose()
+      return
+    }
+
+    handleRoutinePlusOpen()
+  }
+
+  const handleRoutineCreated = () => {
+    setHomeRefreshKey((currentKey) => currentKey + 1)
   }
 
   return (
     <div className='mainlayout__container'>
       <div className='mainlayout__page'>
-        <Outlet />
+        <Outlet
+          context={{
+            openRoutinePlus: handleRoutinePlusOpen,
+            isRoutinePlusOpen,
+            homeRefreshKey,
+          }}
+        />
 
-        {isRoutinePlusOpen && <RoutinePlusPage onClose={handleRoutinePlusClose} />}
+        {isRoutinePlusOpen && (
+          <RoutinePlusPage
+            initialRoutine={initialRoutine}
+            onClose={handleRoutinePlusClose}
+            onCreated={handleRoutineCreated}
+          />
+        )}
+
         <Navigation
           isRoutinePlusOpen={isRoutinePlusOpen}
           onRoutinePlusClick={handleRoutinePlusToggle}

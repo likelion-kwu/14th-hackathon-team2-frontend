@@ -1,6 +1,6 @@
 import './RecommendedRoutineCard.css'
 
-function RecommendedRoutineCard({ routine }) {
+function RecommendedRoutineCard({ routine, onAdd }) {
   const { category, title, theme, characterImage } = routine
 
   return (
@@ -16,6 +16,7 @@ function RecommendedRoutineCard({ routine }) {
 
       <div className='recommendedRoutineCard__text'>
         <span className='recommendedRoutineCard__category'>{category}</span>
+
         <span className='recommendedRoutineCard__title'>{title}</span>
       </div>
 
@@ -23,6 +24,8 @@ function RecommendedRoutineCard({ routine }) {
         type='button'
         className='recommendedRoutineCard__add-button'
         aria-label={`${category} 추천 루틴 추가`}
+        onPointerDown={(event) => event.stopPropagation()}
+        onClick={() => onAdd?.(routine)}
       >
         <span className='recommendedRoutineCard__add-icon'>+</span>
         <span>Add</span>
