@@ -7,6 +7,7 @@ export default defineConfig({
   plugins: [
     react(),
     svgr(),
+
     VitePWA({
       registerType: 'autoUpdate',
 
@@ -42,4 +43,14 @@ export default defineConfig({
       },
     }),
   ],
+
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://api.godlife.likelion.uk',
+        changeOrigin: true,
+        secure: true,
+      },
+    },
+  },
 })
