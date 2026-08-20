@@ -1,9 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { useNavigate } from 'react-router-dom'
 
 import { getStories } from '../../../api/storyApi'
 
-import episodeOneImage from '../../../assets/home-bottom-sheet/image-Rectangle.svg'
+import episodeOneImage from '../../../assets/story/ep1/ep1-1.png'
+import episodeTwoImage from '../../../assets/story/ep2/ep2-1.png'
+import episodeThreeImage from '../../../assets/story/ep3/ep3-1.png'
+import episodeFourImage from '../../../assets/story/ep4/ep4-1.png'
+import episodeFiveImage from '../../../assets/story/ep5/ep5-1.png'
 
 import './Episode.css'
 
@@ -12,6 +17,26 @@ const EPISODE_CONTENT = {
     title: '에피소드 1',
     image: episodeOneImage,
     alt: '에피소드 1 스토리',
+  },
+  2: {
+    title: '에피소드 2',
+    image: episodeTwoImage,
+    alt: '에피소드 2 스토리',
+  },
+  3: {
+    title: '에피소드 3',
+    image: episodeThreeImage,
+    alt: '에피소드 3 스토리',
+  },
+  4: {
+    title: '에피소드 4',
+    image: episodeFourImage,
+    alt: '에피소드 4 스토리',
+  },
+  5: {
+    title: '에피소드 5',
+    image: episodeFiveImage,
+    alt: '에피소드 5 스토리',
   },
 }
 
@@ -32,12 +57,11 @@ function findDisplayEpisode(storyData) {
 }
 
 function Episode({ onClose }) {
+  const navigate = useNavigate()
+
   const [storyData, setStoryData] = useState(null)
-
   const [isLoading, setIsLoading] = useState(true)
-
   const [errorMessage, setErrorMessage] = useState('')
-
   const [reloadKey, setReloadKey] = useState(0)
 
   useEffect(() => {
@@ -87,7 +111,6 @@ function Episode({ onClose }) {
 
     return () => {
       document.body.style.overflow = previousOverflow
-
       window.removeEventListener('keydown', handleKeyDown)
     }
   }, [onClose])
@@ -99,7 +122,6 @@ function Episode({ onClose }) {
   const episodeContent = displayEpisode ? EPISODE_CONTENT[displayEpisode.episodeNumber] : null
 
   const currentStreakDays = storyData?.currentStreakDays ?? 0
-
   const requiredStreakDays = displayEpisode?.requiredStreakDays ?? 0
 
   const progress =
@@ -107,6 +129,15 @@ function Episode({ onClose }) {
 
   const handleRetry = () => {
     setReloadKey((previous) => previous + 1)
+  }
+
+  const handleConfirm = () => {
+    if (displayEpisode?.unlocked) {
+      navigate(`/episode?episode=${displayEpisode.episodeNumber}`)
+      return
+    }
+
+    onClose()
   }
 
   return createPortal(
@@ -199,7 +230,6 @@ function Episode({ onClose }) {
               <div className='episode-popup__progress'>
                 <div className='episode-popup__progress-text'>
                   <span>현재 {currentStreakDays}일</span>
-
                   <span>{requiredStreakDays}일</span>
                 </div>
 
@@ -216,9 +246,11 @@ function Episode({ onClose }) {
           </>
         )}
 
-        <button type='button' className='episode-popup__confirm' onClick={onClose}>
-          확인했어요
-        </button>
+        {!isLoading && !errorMessage && displayEpisode && (
+          <button type='button' className='episode-popup__confirm' onClick={handleConfirm}>
+            {displayEpisode.unlocked ? '에피소드 보기' : '확인했어요'}
+          </button>
+        )}
       </section>
     </div>,
     document.body,
