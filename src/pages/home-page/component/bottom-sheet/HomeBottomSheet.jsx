@@ -9,16 +9,11 @@ import RoutineCard from './routine-card/RoutineCard'
 import RoutineTimeline from './routine-timeline/RoutineTimeline'
 import TodoSection from './todo-section/TodoSection'
 
-import {
-  RECOMMENDED_ROUTINES,
-  ROUTINES,
-  TIMELINE_IMAGES,
-  TODO_ROUTINES,
-} from './homeBottomSheetData'
+import { RECOMMENDED_ROUTINES, TIMELINE_IMAGES } from './homeBottomSheetData'
 
 import './HomeBottomSheet.css'
 
-function HomeBottomSheet({ onDragProgress, achievementData }) {
+function HomeBottomSheet({ onDragProgress, achievementData, routines = [], todos = [], progress }) {
   const [sheetState, setSheetState] = useState('closed')
   const [dragY, setDragY] = useState(null)
   const [pointToast, setPointToast] = useState(null)
@@ -106,16 +101,10 @@ function HomeBottomSheet({ onDragProgress, achievementData }) {
     }, 2000)
   }
 
-  const handleOpenEpisode = () => {
-    setIsEpisodeOpen(true)
-  }
-
   const currentTranslate = getCurrentTranslate()
   const recommendationProgress = getProgress(currentTranslate)
 
-  const completedRoutineCount = ROUTINES.filter((routine) => routine.isCompleted).length
-
-  const completedTodoCount = TODO_ROUTINES.filter((todo) => todo.isCompleted).length
+  const completedTodoCount = todos.filter((todo) => todo.isCompleted).length
 
   const isPopupOpen = isEpisodeOpen || isAchievementOpen
 
@@ -139,11 +128,11 @@ function HomeBottomSheet({ onDragProgress, achievementData }) {
       </div>
 
       <BottomSheetHeader
-        totalCount={ROUTINES.length}
-        completedCount={completedRoutineCount}
+        totalCount={progress?.totalCount ?? 0}
+        completedCount={progress?.completedCount ?? 0}
         achievementData={achievementData}
         onAchievementOpenChange={setIsAchievementOpen}
-        onStoryClick={handleOpenEpisode}
+        onStoryClick={() => setIsEpisodeOpen(true)}
       />
 
       <div className='bottomSheet__content'>
@@ -151,14 +140,14 @@ function HomeBottomSheet({ onDragProgress, achievementData }) {
           <RoutineTimeline sunImage={TIMELINE_IMAGES.sun} moonImage={TIMELINE_IMAGES.moon} />
 
           <div className='routineList'>
-            {ROUTINES.map((routine) => (
+            {routines.map((routine) => (
               <RoutineCard key={routine.id} routine={routine} onReceivePoint={handleReceivePoint} />
             ))}
           </div>
         </section>
 
         <TodoSection
-          todos={TODO_ROUTINES}
+          todos={todos}
           completedCount={completedTodoCount}
           onReceivePoint={handleReceivePoint}
         />

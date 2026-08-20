@@ -2,100 +2,115 @@ import imageDiet from '../../../../assets/home-bottom-sheet/character/image-diet
 import imageHealth from '../../../../assets/home-bottom-sheet/character/image-health.svg'
 import imageSkin from '../../../../assets/home-bottom-sheet/character/image-skin.svg'
 import imageWellbeing from '../../../../assets/home-bottom-sheet/character/image-wellbeing.svg'
+
 import imageMoon from '../../../../assets/home-bottom-sheet/image-moon.svg'
 import imageSun from '../../../../assets/home-bottom-sheet/image-sun.svg'
 
-export const ROUTINES = [
-  {
-    id: 1,
-    category: 'Skin',
-    title: '텍스트',
+const CATEGORY_META = {
+  SKIN: {
+    label: 'Skin',
     theme: 'skin',
     characterImage: imageSkin,
-    isCompleted: false,
-    rewardPoint: 5,
   },
-  {
-    id: 2,
-    category: 'Well-being',
-    title: '텍스트',
+  WELL_BEING: {
+    label: 'Well-being',
     theme: 'wellbeing',
     characterImage: imageWellbeing,
-    isCompleted: false,
-    rewardPoint: 5,
   },
-  {
-    id: 3,
-    category: 'Diet',
-    title: '텍스트',
-    theme: 'diet',
-    characterImage: imageDiet,
-    isCompleted: false,
-    rewardPoint: 10,
-  },
-  {
-    id: 4,
-    category: 'Skin',
-    title: '텍스트',
-    theme: 'skin',
-    characterImage: imageSkin,
-    isCompleted: false,
-    rewardPoint: 5,
-  },
-  {
-    id: 5,
-    category: 'Health & Fit',
-    title: '텍스트',
+  HEALTH_FIT: {
+    label: 'Health & Fit',
     theme: 'health',
     characterImage: imageHealth,
-    isCompleted: false,
-    rewardPoint: 10,
   },
-]
+  DIET: {
+    label: 'Diet',
+    theme: 'diet',
+    characterImage: imageDiet,
+  },
+}
 
-export const TODO_ROUTINES = [
-  {
-    id: 1,
-    time: '00:00',
-    title: '텍스트',
-    isCompleted: false,
-    rewardPoint: 5,
-  },
-  {
-    id: 2,
-    time: '시간 미지정',
-    title: '텍스트',
-    isCompleted: false,
-    rewardPoint: 5,
-  },
-]
+const DEFAULT_CATEGORY_META = {
+  label: 'Routine',
+  theme: 'wellbeing',
+  characterImage: imageWellbeing,
+}
 
+export function createRoutineCardData(dailyRoutine, homeRoutine) {
+  const categoryMeta = CATEGORY_META[dailyRoutine.category] ?? DEFAULT_CATEGORY_META
+
+  const verificationType =
+    homeRoutine?.verificationType ?? dailyRoutine.verification?.type ?? 'CHECK'
+
+  return {
+    id: dailyRoutine.id,
+    dailyRoutineId: dailyRoutine.id,
+    routineId: dailyRoutine.routineId,
+
+    categoryCode: dailyRoutine.category,
+    category: categoryMeta.label,
+    title: dailyRoutine.content,
+    theme: categoryMeta.theme,
+    characterImage: categoryMeta.characterImage,
+
+    startTime: dailyRoutine.startTime,
+    endTime: dailyRoutine.endTime,
+    status: dailyRoutine.status,
+    isCompleted: dailyRoutine.status === 'COMPLETED',
+
+    verificationType,
+    verificationObject: dailyRoutine.verificationObject,
+
+    pointClaim: dailyRoutine.pointClaim ?? null,
+
+    rewardPoint: dailyRoutine.pointClaim?.rewardPoints ?? (verificationType === 'PHOTO' ? 10 : 5),
+  }
+}
+
+export function createTodoCardData(dailyRoutine) {
+  return {
+    id: dailyRoutine.id,
+    dailyRoutineId: dailyRoutine.id,
+    routineId: dailyRoutine.routineId,
+
+    time: dailyRoutine.startTime ?? '시간 미지정',
+    title: dailyRoutine.content,
+
+    status: dailyRoutine.status,
+    isCompleted: dailyRoutine.status === 'COMPLETED',
+
+    verificationObject: dailyRoutine.verificationObject,
+  }
+}
+
+/*
+ * 추천 루틴은 다음 단계에서 API 데이터로 교체한다.
+ */
 export const RECOMMENDED_ROUTINES = [
   {
     id: 1,
     category: 'Skin',
-    title: '텍스트',
+    title: '외출 전 선크림 바르기',
     theme: 'skin',
     characterImage: imageSkin,
   },
   {
     id: 2,
     category: 'Well-being',
-    title: '텍스트',
+    title: '잠들기 전 명상하기',
     theme: 'wellbeing',
     characterImage: imageWellbeing,
   },
   {
     id: 3,
     category: 'Diet',
-    title: '텍스트',
+    title: '하루 물 2L 마시기',
     theme: 'diet',
     characterImage: imageDiet,
   },
   {
     id: 4,
     category: 'Health & Fit',
-    title: '텍스트',
+    title: '가볍게 스트레칭하기',
     theme: 'health',
     characterImage: imageHealth,
   },
