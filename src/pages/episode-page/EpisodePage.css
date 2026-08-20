@@ -1,0 +1,192 @@
+.episode-page {
+  position: relative;
+
+  width: 100%;
+  height: 100svh;
+  max-height: 874px;
+
+  margin: 0 auto;
+
+  overflow: hidden;
+
+  background-color: #000000;
+}
+
+/* 뒤로가기 버튼 */
+
+.episode-page__back-area {
+  position: absolute;
+
+  top: clamp(40px, 7svh, 60px);
+  left: 25px;
+
+  z-index: 20;
+
+  width: 44px;
+  height: 44px;
+}
+
+.episode-page__back-area .back-button {
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 1)) drop-shadow(0 0 8px rgba(255, 255, 255, 0.9))
+    drop-shadow(0 0 14px rgba(255, 255, 255, 0.7));
+}
+
+/* 스토리 영역 */
+
+.episode-page__content {
+  position: absolute;
+
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  overflow: hidden;
+
+  cursor: pointer;
+
+  background-color: #000000;
+}
+
+/* 모든 에피소드 이미지 */
+
+.episode-page__story-image {
+  position: absolute;
+
+  inset: 0;
+
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+  object-position: center;
+
+  opacity: 0;
+
+  transition:
+    opacity 0.9s ease-in-out,
+    transform 2.2s ease-out;
+
+  transform: scale(1.015);
+
+  user-select: none;
+  -webkit-user-drag: none;
+
+  pointer-events: none;
+
+  will-change: opacity, transform;
+}
+
+/* 현재 보여지는 이미지 */
+
+.episode-page__story-image.active {
+  z-index: 2;
+
+  opacity: 1;
+
+  transform: scale(1);
+}
+
+/* 마지막 장면 버튼 영역 */
+
+.episode-page__footer {
+  position: absolute;
+
+  right: 0;
+  bottom: 0;
+  left: 0;
+
+  z-index: 10;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: flex-end;
+
+  width: 100%;
+  max-width: 450px;
+  height: 150px;
+
+  margin: 0 auto;
+
+  pointer-events: none;
+
+  opacity: 0;
+
+  transition: opacity 0.5s ease;
+
+  isolation: isolate;
+}
+
+/* 마지막 이미지일 때 footer 표시 */
+
+.episode-page__footer.active {
+  opacity: 1;
+}
+
+/* 버튼 뒤쪽 흰색 블러 */
+
+.episode-page__footer::before {
+  content: '';
+
+  position: absolute;
+
+  inset: 0;
+
+  z-index: 0;
+
+  pointer-events: none;
+
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.3) 35%,
+    rgba(255, 255, 255, 0.75) 65%,
+    rgba(255, 255, 255, 0.95) 100%
+  );
+
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  mask-image: linear-gradient(to bottom, transparent 0%, black 100%);
+
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 100%);
+}
+
+/* 확인 버튼 */
+
+.episode-page__footer .bottom-button {
+  position: relative;
+
+  z-index: 1;
+
+  background-color: #4dc4ff;
+  color: #ffffff;
+
+  opacity: 1;
+
+  cursor: pointer;
+
+  pointer-events: auto;
+}
+
+/* 존재하지 않는 에피소드 */
+
+.episode-page__empty {
+  position: absolute;
+
+  top: 50%;
+  left: 50%;
+
+  transform: translate(-50%, -50%);
+
+  width: 100%;
+
+  color: #ffffff;
+
+  font-size: 16px;
+  text-align: center;
+}

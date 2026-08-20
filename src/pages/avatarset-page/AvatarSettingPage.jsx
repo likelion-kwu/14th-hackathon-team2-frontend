@@ -250,7 +250,7 @@ function AvatarSettingPage() {
         facePhoto: capturedPhoto.file,
       })
 
-      navigate('/story', {
+      navigate('/intro', {
         replace: true,
       })
     } catch (error) {
