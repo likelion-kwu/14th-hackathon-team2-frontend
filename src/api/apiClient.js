@@ -20,9 +20,13 @@ function createRequestUrl(path) {
   return `${baseUrl}/${endpoint}`
 }
 
-async function parseResponse(response) {
+async function parseResponse(response, responseType) {
   if (response.status === 204) {
     return null
+  }
+
+  if (responseType === 'blob' && response.ok) {
+    return response.blob()
   }
 
   const responseText = await response.text()
@@ -40,7 +44,7 @@ async function parseResponse(response) {
 
 export async function apiRequest(
   path,
-  { method = 'GET', body, headers = {}, auth = true, ...options } = {},
+  { method = 'GET', body, headers = {}, auth = true, responseType = 'json', ...options } = {},
 ) {
   const requestHeaders = new Headers(headers)
 
@@ -81,7 +85,7 @@ export async function apiRequest(
     })
   }
 
-  const payload = await parseResponse(response)
+  const payload = await parseResponse(response, responseType)
 
   if (!response.ok) {
     throw new ApiError({
@@ -90,6 +94,10 @@ export async function apiRequest(
       message: payload?.message ?? '요청을 처리하지 못했습니다.',
       details: payload?.details ?? [],
     })
+  }
+
+  if (responseType === 'blob') {
+    return payload
   }
 
   return payload?.data ?? payload
