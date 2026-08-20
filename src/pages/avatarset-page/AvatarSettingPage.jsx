@@ -1,15 +1,7 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
-import './AvatarSettingPage.css'
-
-import { createAvatar } from '../../api/avatarApi'
-import {
-  activateSpeechStylePreset,
-  getSpeechStylePresets,
-  updateSpeechStyle,
-} from '../../api/speechStyleApi'
-import { getCurrentUser } from '../../api/userApi'
+import { getSpeechStyle, updateSpeechStyle } from '../../api/speechStyleApi'
 
 import MainTitle from '../../components/initial-page-title/MainTitle'
 import SubTitle from '../../components/initial-page-title/SubTitle'
@@ -18,25 +10,7 @@ import BottomButton from '../../components/bottom-button/BottomButton'
 
 import PopupPage from './popup-page/PopupPage'
 
-const GROWTH_TRACK_KEY = 'selected_growth_track'
-
-const SPEECH_STYLE_SETTINGS = {
-  kind: {
-    directness: 'LOW',
-    warmth: 'HIGH',
-    playfulness: 'LOW',
-  },
-  cranky: {
-    directness: 'HIGH',
-    warmth: 'LOW',
-    playfulness: 'LOW',
-  },
-  playful: {
-    directness: 'MEDIUM',
-    warmth: 'MEDIUM',
-    playfulness: 'HIGH',
-  },
-}
+import './AvatarSettingPage.css'
 
 function stopCameraStream(stream) {
   stream?.getTracks().forEach((track) => {
@@ -62,20 +36,71 @@ function getCameraErrorMessage(error) {
 
 function AvatarSettingPage() {
   const navigate = useNavigate()
+  const location = useLocation()
+
+  const searchParams = new URLSearchParams(location.search)
+
+  const isCustomizeMode =
+    location.state?.fromCustomize === true || searchParams.get('from') === 'customize'
 
   const [isPopupOpen, setIsPopupOpen] = useState(false)
   const [isCameraLoading, setIsCameraLoading] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [cameraStream, setCameraStream] = useState(null)
+
+  const [isSpeechLoading, setIsSpeechLoading] = useState(false)
+  const [isSpeechSaving, setIsSpeechSaving] = useState(false)
+
+  const [speechLevel, setSpeechLevel] = useState('BANMAL')
+  const [sentenceLength, setSentenceLength] = useState('SHORT')
+  const [speechStyle, setSpeechStyle] = useState('kind')
 
   const [capturedPhoto, setCapturedPhoto] = useState({
     file: null,
     url: '',
   })
 
-  const [speechLevel, setSpeechLevel] = useState('BANMAL')
-  const [sentenceLength, setSentenceLength] = useState('SHORT')
-  const [speechStyle, setSpeechStyle] = useState('kind')
+  useEffect(() => {
+    if (!isCustomizeMode) return undefined
+
+    let isCancelled = false
+
+    const loadSpeechStyle = async () => {
+      setIsSpeechLoading(true)
+
+      try {
+        const result = await getSpeechStyle()
+
+        if (isCancelled) return
+
+        const settings = result?.settings ?? {}
+
+        setSpeechLevel(settings.speechLevel ?? 'BANMAL')
+        setSentenceLength(settings.sentenceLength ?? 'SHORT')
+
+        if (settings.playfulness === 'HIGH') {
+          setSpeechStyle('playful')
+        } else if (settings.warmth === 'LOW' && settings.directness === 'HIGH') {
+          setSpeechStyle('cranky')
+        } else {
+          setSpeechStyle('kind')
+        }
+      } catch (error) {
+        console.error('현재 말투 설정을 불러오지 못했습니다.', error)
+
+        alert(error.message ?? '현재 말투 설정을 불러오지 못했습니다.')
+      } finally {
+        if (!isCancelled) {
+          setIsSpeechLoading(false)
+        }
+      }
+    }
+
+    loadSpeechStyle()
+
+    return () => {
+      isCancelled = true
+    }
+  }, [isCustomizeMode])
 
   useEffect(() => {
     return () => {
@@ -92,19 +117,21 @@ function AvatarSettingPage() {
   }, [cameraStream])
 
   const handleBack = () => {
-    navigate('/tracksetting')
+    navigate(isCustomizeMode ? '/customize' : '/tracksetting')
   }
 
   const handleOpenPopup = async () => {
-    if (isCameraLoading || isSubmitting) return
+    if (isCameraLoading) return
 
     if (!window.isSecureContext) {
       alert('카메라는 HTTPS 또는 localhost에서만 사용할 수 있어요.')
+
       return
     }
 
     if (!navigator.mediaDevices?.getUserMedia) {
       alert('현재 브라우저에서는 카메라 기능을 지원하지 않아요.')
+
       return
     }
 
@@ -141,10 +168,6 @@ function AvatarSettingPage() {
   }
 
   const handlePhotoCapture = (photoFile) => {
-    if (capturedPhoto.url) {
-      URL.revokeObjectURL(capturedPhoto.url)
-    }
-
     const photoUrl = URL.createObjectURL(photoFile)
 
     setCapturedPhoto({
@@ -159,61 +182,54 @@ function AvatarSettingPage() {
   }
 
   const handleNext = async () => {
-    if (isSubmitting) return
+    if (isCustomizeMode) {
+      if (isSpeechLoading || isSpeechSaving) return
 
-    setIsSubmitting(true)
+      const styleSettings = {
+        kind: {
+          directness: 'MEDIUM',
+          warmth: 'HIGH',
+          playfulness: 'LOW',
+        },
+        cranky: {
+          directness: 'HIGH',
+          warmth: 'LOW',
+          playfulness: 'LOW',
+        },
+        playful: {
+          directness: 'MEDIUM',
+          warmth: 'MEDIUM',
+          playfulness: 'HIGH',
+        },
+      }
 
-    try {
-      const user = await getCurrentUser()
+      setIsSpeechSaving(true)
 
-      if (!user.avatarConfigured) {
-        const growthTrack = sessionStorage.getItem(GROWTH_TRACK_KEY)
-
-        if (!growthTrack) {
-          alert('성장 트랙을 먼저 선택해 주세요.')
-          navigate('/tracksetting')
-          return
-        }
-
-        await createAvatar({
-          growthTrack,
-          facePhoto: capturedPhoto.file,
+      try {
+        await updateSpeechStyle({
+          speechLevel,
+          sentenceLength,
+          ...styleSettings[speechStyle],
         })
+
+        navigate('/customize')
+      } catch (error) {
+        console.error('말투 설정을 저장하지 못했습니다.', error)
+
+        alert(error.message ?? '말투 설정을 저장하지 못했습니다.')
+      } finally {
+        setIsSpeechSaving(false)
       }
 
-      if (!user.speechStyleConfigured) {
-        const presets = await getSpeechStylePresets()
-
-        const selectedPreset = presets.find((preset) => preset.code === 'CALM') ?? presets[0]
-
-        if (!selectedPreset) {
-          throw new Error('사용 가능한 말투 프리셋이 없습니다.')
-        }
-
-        await activateSpeechStylePreset(selectedPreset.code)
-      }
-
-      const selectedStyleSettings = SPEECH_STYLE_SETTINGS[speechStyle]
-
-      await updateSpeechStyle({
-        speechLevel,
-        sentenceLength,
-        directness: selectedStyleSettings.directness,
-        warmth: selectedStyleSettings.warmth,
-        playfulness: selectedStyleSettings.playfulness,
-        profanityEnabled: false,
-      })
-
-      sessionStorage.removeItem(GROWTH_TRACK_KEY)
-
-      navigate('/story')
-    } catch (error) {
-      console.error(error)
-
-      alert(error.message ?? '아바타 설정을 완료하지 못했습니다.')
-    } finally {
-      setIsSubmitting(false)
+      return
     }
+
+    /*
+     * 기존 온보딩 이동 기능은 그대로 유지한다.
+     * 촬영된 파일은 capturedPhoto.file에 저장된다.
+     */
+
+    navigate('/story')
   }
 
   return (
@@ -240,7 +256,7 @@ function AvatarSettingPage() {
             <button
               className='avatar-setting-page__generator'
               type='button'
-              disabled={isCameraLoading || isSubmitting}
+              disabled={isCameraLoading}
               aria-busy={isCameraLoading}
               aria-label={capturedPhoto.url ? '사진 다시 촬영하기' : '아바타 생성용 사진 촬영하기'}
               onClick={handleOpenPopup}
@@ -269,7 +285,7 @@ function AvatarSettingPage() {
                   name='speech-level'
                   value='BANMAL'
                   checked={speechLevel === 'BANMAL'}
-                  disabled={isSubmitting}
+                  disabled={isSpeechLoading || isSpeechSaving}
                   onChange={(event) => setSpeechLevel(event.target.value)}
                 />
 
@@ -282,7 +298,7 @@ function AvatarSettingPage() {
                   name='speech-level'
                   value='JONDAEMAL'
                   checked={speechLevel === 'JONDAEMAL'}
-                  disabled={isSubmitting}
+                  disabled={isSpeechLoading || isSpeechSaving}
                   onChange={(event) => setSpeechLevel(event.target.value)}
                 />
 
@@ -297,7 +313,7 @@ function AvatarSettingPage() {
                   name='response-length'
                   value='SHORT'
                   checked={sentenceLength === 'SHORT'}
-                  disabled={isSubmitting}
+                  disabled={isSpeechLoading || isSpeechSaving}
                   onChange={(event) => setSentenceLength(event.target.value)}
                 />
 
@@ -310,7 +326,7 @@ function AvatarSettingPage() {
                   name='response-length'
                   value='MEDIUM'
                   checked={sentenceLength === 'MEDIUM'}
-                  disabled={isSubmitting}
+                  disabled={isSpeechLoading || isSpeechSaving}
                   onChange={(event) => setSentenceLength(event.target.value)}
                 />
 
@@ -323,7 +339,7 @@ function AvatarSettingPage() {
                   name='response-length'
                   value='LONG'
                   checked={sentenceLength === 'LONG'}
-                  disabled={isSubmitting}
+                  disabled={isSpeechLoading || isSpeechSaving}
                   onChange={(event) => setSentenceLength(event.target.value)}
                 />
 
@@ -338,7 +354,7 @@ function AvatarSettingPage() {
                   name='speech-style'
                   value='kind'
                   checked={speechStyle === 'kind'}
-                  disabled={isSubmitting}
+                  disabled={isSpeechLoading || isSpeechSaving}
                   onChange={(event) => setSpeechStyle(event.target.value)}
                 />
 
@@ -351,7 +367,7 @@ function AvatarSettingPage() {
                   name='speech-style'
                   value='cranky'
                   checked={speechStyle === 'cranky'}
-                  disabled={isSubmitting}
+                  disabled={isSpeechLoading || isSpeechSaving}
                   onChange={(event) => setSpeechStyle(event.target.value)}
                 />
 
@@ -364,7 +380,7 @@ function AvatarSettingPage() {
                   name='speech-style'
                   value='playful'
                   checked={speechStyle === 'playful'}
-                  disabled={isSubmitting}
+                  disabled={isSpeechLoading || isSpeechSaving}
                   onChange={(event) => setSpeechStyle(event.target.value)}
                 />
 
@@ -383,8 +399,8 @@ function AvatarSettingPage() {
           <span />
         </div>
 
-        <BottomButton onClick={handleNext} disabled={isSubmitting}>
-          {isSubmitting ? '아바타 설정 중...' : '다음'}
+        <BottomButton onClick={handleNext} disabled={isSpeechLoading || isSpeechSaving}>
+          {isCustomizeMode ? (isSpeechSaving ? '저장 중...' : '설정 저장하기') : '다음'}
         </BottomButton>
       </footer>
 

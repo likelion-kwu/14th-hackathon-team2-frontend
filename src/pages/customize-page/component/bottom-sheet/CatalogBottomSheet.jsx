@@ -1,23 +1,23 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 
-import { getItems, updateAvatarEquipment } from '../../../../api/itemApi'
+import { Icon } from '../../../../components/icon/Icon'
+import { getItemAsset } from '../../itemAssetMap'
 
 import './CatalogBottomSheet.css'
 
-function CatalogBottomSheet({ onDragProgress }) {
+function CatalogBottomSheet({
+  items = [],
+  equippedItemIds = [],
+  totalPoints = 0,
+  isLoading = false,
+  isSaving = false,
+  errorMessage = '',
+  onItemToggle,
+  onAvatarSettingClick,
+  onDragProgress,
+}) {
   const [sheetState, setSheetState] = useState('closed')
-
   const [dragY, setDragY] = useState(null)
-
-  const [items, setItems] = useState([])
-
-  const [equippedItemIds, setEquippedItemIds] = useState([])
-
-  const [isLoading, setIsLoading] = useState(false)
-
-  const [isSaving, setIsSaving] = useState(false)
-
-  const [errorMessage, setErrorMessage] = useState('')
 
   const startYRef = useRef(0)
   const startTranslateRef = useRef(0)
@@ -31,44 +31,7 @@ function CatalogBottomSheet({ onDragProgress }) {
     closed: screenHeight * 0.65,
   }
 
-  useEffect(() => {
-    let isCancelled = false
-
-    const loadItems = async () => {
-      setIsLoading(true)
-      setErrorMessage('')
-
-      try {
-        const result = await getItems({
-          ownedOnly: false,
-        })
-
-        if (isCancelled) return
-
-        const itemList = Array.isArray(result) ? result : []
-
-        setItems(itemList)
-
-        setEquippedItemIds(itemList.filter((item) => item.equipped).map((item) => item.id))
-      } catch (error) {
-        console.error('아이템 목록을 불러오지 못했습니다.', error)
-
-        if (!isCancelled) {
-          setErrorMessage(error.message ?? '아이템 목록을 불러오지 못했습니다.')
-        }
-      } finally {
-        if (!isCancelled) {
-          setIsLoading(false)
-        }
-      }
-    }
-
-    loadItems()
-
-    return () => {
-      isCancelled = true
-    }
-  }, [])
+  const ownedCount = items.filter((item) => item.owned).length
 
   const getCurrentTranslate = () => {
     if (dragY !== null) return dragY
@@ -76,11 +39,13 @@ function CatalogBottomSheet({ onDragProgress }) {
     return SNAP[sheetState]
   }
 
+  const getProgress = (translateY) => {
+    return Math.max(0, Math.min(1, (SNAP.closed - translateY) / (SNAP.closed - SNAP.middle)))
+  }
+
   const handlePointerDown = (event) => {
     draggingRef.current = true
-
     startYRef.current = event.clientY
-
     startTranslateRef.current = getCurrentTranslate()
 
     event.currentTarget.setPointerCapture(event.pointerId)
@@ -91,15 +56,10 @@ function CatalogBottomSheet({ onDragProgress }) {
 
     const diff = event.clientY - startYRef.current
 
-    let nextY = startTranslateRef.current + diff
-
-    nextY = Math.max(SNAP.open, Math.min(nextY, SNAP.closed))
+    const nextY = Math.max(SNAP.open, Math.min(startTranslateRef.current + diff, SNAP.closed))
 
     setDragY(nextY)
-
-    const progress = Math.min(1, (SNAP.closed - nextY) / (SNAP.closed - SNAP.middle))
-
-    onDragProgress?.(progress)
+    onDragProgress?.(getProgress(nextY))
   }
 
   const handlePointerUp = () => {
@@ -109,133 +69,114 @@ function CatalogBottomSheet({ onDragProgress }) {
 
     const currentY = getCurrentTranslate()
 
-    const nearestState = Object.entries(SNAP).reduce((nearest, current) => {
-      const [, nearestSnapY] = nearest
+    const [nextState, nextY] = Object.entries(SNAP).reduce((nearest, current) => {
+      const [, nearestY] = nearest
+      const [, currentYValue] = current
 
-      const [, currentSnapY] = current
-
-      return Math.abs(currentY - currentSnapY) < Math.abs(currentY - nearestSnapY)
-        ? current
-        : nearest
+      return Math.abs(currentY - currentYValue) < Math.abs(currentY - nearestY) ? current : nearest
     })
-
-    const [nextState, nextY] = nearestState
 
     setSheetState(nextState)
     setDragY(null)
 
-    const progress = Math.min(1, (SNAP.closed - nextY) / (SNAP.closed - SNAP.middle))
-
-    onDragProgress?.(progress)
+    onDragProgress?.(getProgress(nextY))
   }
-
-  const handleItemClick = async (item) => {
-    if (!item.owned || isSaving) return
-
-    const previousItemIds = equippedItemIds
-
-    const isEquipped = previousItemIds.includes(item.id)
-
-    const nextItemIds = isEquipped
-      ? previousItemIds.filter((itemId) => itemId !== item.id)
-      : [...previousItemIds, item.id]
-
-    setEquippedItemIds(nextItemIds)
-    setIsSaving(true)
-    setErrorMessage('')
-
-    try {
-      const result = await updateAvatarEquipment(nextItemIds)
-
-      const savedItemIds = result?.equippedItems?.map((equippedItem) => equippedItem.itemId)
-
-      if (savedItemIds) {
-        setEquippedItemIds(savedItemIds)
-      }
-    } catch (error) {
-      console.error('아이템 장착에 실패했습니다.', error)
-
-      setEquippedItemIds(previousItemIds)
-
-      setErrorMessage(error.message ?? '아이템 장착에 실패했습니다.')
-    } finally {
-      setIsSaving(false)
-    }
-  }
-
-  const ownedItemCount = items.filter((item) => item.owned).length
 
   return (
-    <div
-      className={`bottom-sheet ${dragY !== null ? 'dragging' : ''}`}
+    <section
+      className={`catalogSheet catalogSheet--${sheetState} ${
+        dragY !== null ? 'catalogSheet--dragging' : ''
+      }`}
       style={{
         transform: `translateY(${getCurrentTranslate()}px)`,
       }}
+      aria-label='아이템 도감'
     >
       <div
-        className='bottom-sheet__drag-area'
+        className='catalogSheet__drag-area'
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
       >
-        <div className='bottom-sheet__handle' />
+        <div className='catalogSheet__handle' />
       </div>
 
-      <div className='bottomSheet__header'>
-        <div className='bottomSheet__header__text'>
-          <div className='bottomSheet__header__text--title'>아이템 도감</div>
+      <header className='catalogSheet__header'>
+        <div>
+          <h2 className='catalogSheet__title'>아이템 도감</h2>
 
-          <div className='bottomSheet__header__text--description'>
-            {items.length}개 중 {ownedItemCount}개를 보유하고 있어요
+          <p className='catalogSheet__description'>
+            {items.length}개 중 {ownedCount}개를 보유하고 있어요
+          </p>
+        </div>
+
+        <div className='catalogSheet__header-actions'>
+          <div className='catalogSheet__point' aria-label={`누적 ${totalPoints}포인트`}>
+            {String(totalPoints).padStart(3, '0')}P
           </div>
-        </div>
 
-        <div className='bottomSheet__header__icons'>
-          {isSaving && <span className='catalog__saving'>저장 중...</span>}
-        </div>
-      </div>
+          <button
+            type='button'
+            className='catalogSheet__setting-button'
+            aria-label='아바타 설정 열기'
+            onClick={onAvatarSettingClick}
+          >
+            <Icon name='icon-setting' width={44} height={44} />
+          </button>
 
-      <div className='catalog__content'>
-        {errorMessage && <div className='catalog__error'>{errorMessage}</div>}
+          {isSaving && <span className='catalogSheet__saving'>저장 중...</span>}
+        </div>
+      </header>
+
+      <div className='catalogSheet__content'>
+        {errorMessage && <p className='catalogSheet__error'>{errorMessage}</p>}
 
         {isLoading ? (
-          <div className='catalog__empty'>아이템을 불러오는 중...</div>
+          <p className='catalogSheet__empty'>아이템을 불러오는 중...</p>
         ) : items.length === 0 ? (
-          <div className='catalog__empty'>아직 등록된 아이템이 없어요.</div>
+          <p className='catalogSheet__empty'>아직 등록된 아이템이 없어요.</p>
         ) : (
-          <div className='catalog__list'>
+          <div className='catalogSheet__grid'>
             {items.map((item) => {
               const isEquipped = equippedItemIds.includes(item.id)
+              const itemImage = getItemAsset(item.assetKey)
 
               return (
                 <button
                   key={item.id}
                   type='button'
-                  className={`catalog__item ${
-                    item.owned ? 'catalog__item--owned' : 'catalog__item--locked'
-                  } ${isEquipped ? 'catalog__item--equipped' : ''}`}
+                  className={`catalogItem ${
+                    item.owned ? 'catalogItem--owned' : 'catalogItem--locked'
+                  } ${isEquipped ? 'catalogItem--equipped' : ''}`}
                   disabled={!item.owned || isSaving}
-                  onClick={() => handleItemClick(item)}
+                  aria-pressed={isEquipped}
+                  onClick={() => onItemToggle?.(item)}
                 >
-                  <div className='catalog__item__preview'>
-                    {item.name?.slice(0, 1) ?? '?'}
+                  <span className='catalogItem__image-area'>
+                    {itemImage ? (
+                      <img src={itemImage} alt='' className='catalogItem__image' />
+                    ) : (
+                      <span className='catalogItem__placeholder' aria-hidden='true'>
+                        {item.name?.slice(0, 1) ?? '?'}
+                      </span>
+                    )}
 
-                    {!item.owned && <span className='catalog__item__lock'>잠김</span>}
+                    {!item.owned && <span className='catalogItem__lock'>잠김</span>}
 
-                    {isEquipped && <span className='catalog__item__equipped'>착용 중</span>}
-                  </div>
+                    {isEquipped && <span className='catalogItem__equipped-badge'>착용 중</span>}
+                  </span>
 
-                  <div className='catalog__item__name'>{item.name}</div>
+                  <span className='catalogItem__name'>{item.name}</span>
 
-                  <div className='catalog__item__type'>{item.type}</div>
+                  <span className='catalogItem__type'>{item.type}</span>
                 </button>
               )
             })}
           </div>
         )}
       </div>
-    </div>
+    </section>
   )
 }
 

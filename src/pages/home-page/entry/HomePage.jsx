@@ -56,7 +56,12 @@ function getRecommendationArray(response) {
 }
 
 function HomePage() {
-  const { openRoutinePlus, isRoutinePlusOpen, homeRefreshKey } = useOutletContext()
+  const {
+    openRoutinePlus,
+    isRoutinePlusOpen,
+    homeRefreshKey,
+    deletedRoutineIds = [],
+  } = useOutletContext()
 
   const [sheetProgress, setSheetProgress] = useState(0)
   const [isChatVisible, setIsChatVisible] = useState(false)
@@ -101,6 +106,15 @@ function HomePage() {
         const homeRoutines = home.routines ?? []
         const dailyRoutines = dailyRoutineData.routines ?? []
 
+        const deletedRoutineIdSet = new Set(deletedRoutineIds.map((routineId) => String(routineId)))
+
+        const hiddenRegularRoutines = dailyRoutines.filter((dailyRoutine) => {
+          return (
+            dailyRoutine.category !== 'TO_DO' &&
+            deletedRoutineIdSet.has(String(dailyRoutine.routineId))
+          )
+        })
+
         const homeRoutineMap = new Map(
           homeRoutines.map((routine) => [routine.dailyRoutineId, routine]),
         )
@@ -109,8 +123,12 @@ function HomePage() {
         const todoRoutines = []
 
         dailyRoutines.forEach((dailyRoutine) => {
+          if (deletedRoutineIdSet.has(String(dailyRoutine.routineId))) {
+            return
+          }
+
           if (dailyRoutine.category === 'TO_DO') {
-            todoRoutines.push(createTodoCardData(dailyRoutine))
+            todoRoutines.push(createTodoCardData(dailyRoutine, dailyRoutineData.serviceDate))
             return
           }
 
@@ -124,8 +142,12 @@ function HomePage() {
         setTodos(todoRoutines)
 
         setProgress({
-          completedCount: home.progress?.completedCount ?? 0,
-          totalCount: home.progress?.totalCount ?? 0,
+          completedCount: Math.max(
+            0,
+            (home.progress?.completedCount ?? 0) -
+              hiddenRegularRoutines.filter((routine) => routine.status === 'COMPLETED').length,
+          ),
+          totalCount: Math.max(0, (home.progress?.totalCount ?? 0) - hiddenRegularRoutines.length),
         })
 
         setAchievementData({
@@ -134,6 +156,7 @@ function HomePage() {
         })
       } catch (error) {
         console.error(error)
+
         alert(error.message ?? '홈 정보를 불러오지 못했습니다.')
       }
     }
@@ -143,7 +166,7 @@ function HomePage() {
     return () => {
       isMounted = false
     }
-  }, [homeRefreshKey])
+  }, [deletedRoutineIds, homeRefreshKey])
 
   useEffect(() => {
     let isMounted = true

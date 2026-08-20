@@ -11,6 +11,18 @@ const MainLayout = () => {
   const [initialRoutine, setInitialRoutine] = useState(null)
   const [homeRefreshKey, setHomeRefreshKey] = useState(0)
 
+  const [deletedRoutineIds, setDeletedRoutineIds] = useState(() => {
+    try {
+      const savedRoutineIds = window.sessionStorage.getItem('filaby-deleted-routine-ids')
+
+      const parsedRoutineIds = savedRoutineIds ? JSON.parse(savedRoutineIds) : []
+
+      return Array.isArray(parsedRoutineIds) ? parsedRoutineIds : []
+    } catch {
+      return []
+    }
+  })
+
   const handleRoutinePlusOpen = (routine = null) => {
     setInitialRoutine(routine)
     setIsRoutinePlusOpen(true)
@@ -34,6 +46,26 @@ const MainLayout = () => {
     setHomeRefreshKey((currentKey) => currentKey + 1)
   }
 
+  const handleRoutineDeleted = (routineId) => {
+    setDeletedRoutineIds((currentIds) => {
+      if (currentIds.includes(routineId)) {
+        return currentIds
+      }
+
+      const nextIds = [...currentIds, routineId]
+
+      try {
+        window.sessionStorage.setItem('filaby-deleted-routine-ids', JSON.stringify(nextIds))
+      } catch (error) {
+        console.error('삭제한 루틴 정보를 저장하지 못했습니다.', error)
+      }
+
+      return nextIds
+    })
+
+    setHomeRefreshKey((currentKey) => currentKey + 1)
+  }
+
   return (
     <div className='mainlayout__container'>
       <div className='mainlayout__page'>
@@ -42,6 +74,7 @@ const MainLayout = () => {
             openRoutinePlus: handleRoutinePlusOpen,
             isRoutinePlusOpen,
             homeRefreshKey,
+            deletedRoutineIds,
           }}
         />
 
@@ -50,6 +83,7 @@ const MainLayout = () => {
             initialRoutine={initialRoutine}
             onClose={handleRoutinePlusClose}
             onCreated={handleRoutineCreated}
+            onDeleted={handleRoutineDeleted}
           />
         )}
 

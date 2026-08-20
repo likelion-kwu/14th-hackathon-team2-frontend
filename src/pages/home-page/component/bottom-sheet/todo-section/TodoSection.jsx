@@ -2,7 +2,7 @@ import TodoCard from '../todo-card/TodoCard'
 
 import './TodoSection.css'
 
-function TodoSection({ todos, completedCount, onReceivePoint }) {
+function TodoSection({ todos, completedCount, onEdit }) {
   return (
     <section className='todoSection'>
       <div className='todoSection__header'>
@@ -15,11 +15,7 @@ function TodoSection({ todos, completedCount, onReceivePoint }) {
 
       <div className='todoList'>
         {todos.map((todo) => (
-          <TodoCard
-            key={todo.id}
-            todo={todo}
-            onReceivePoint={onReceivePoint}
-          />
+          <TodoCard key={todo.id} todo={todo} onEdit={onEdit} />
         ))}
       </div>
     </section>

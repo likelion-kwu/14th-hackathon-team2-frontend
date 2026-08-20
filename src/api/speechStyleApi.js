@@ -1,16 +1,7 @@
 import { apiRequest } from './apiClient'
 
-export function getSpeechStylePresets() {
-  return apiRequest('/speech-style/presets')
-}
-
-export function activateSpeechStylePreset(presetCode) {
-  return apiRequest('/speech-style/preset', {
-    method: 'POST',
-    body: {
-      presetCode,
-    },
-  })
+export function getSpeechStyle() {
+  return apiRequest('/speech-style')
 }
 
 export function updateSpeechStyle(settings) {
@@ -18,4 +9,28 @@ export function updateSpeechStyle(settings) {
     method: 'PATCH',
     body: settings,
   })
+}
+
+export function createKakaoSpeechStyleJob(file) {
+  const formData = new FormData()
+
+  formData.append('file', file)
+
+  return apiRequest('/speech-style/kakao/jobs', {
+    method: 'POST',
+    body: formData,
+  })
+}
+
+export function analyzeKakaoSpeechStyleJob(jobId, participantId) {
+  return apiRequest(`/speech-style/kakao/jobs/${jobId}/analyze`, {
+    method: 'POST',
+    body: {
+      participantId,
+    },
+  })
+}
+
+export function getKakaoSpeechStyleJob(jobId) {
+  return apiRequest(`/speech-style/kakao/jobs/${jobId}`)
 }

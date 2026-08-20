@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 
 import {
   createRoutine,
+  deleteRoutine,
   getRoutine,
   getVerificationObjects,
   updateRoutine,
@@ -187,39 +188,73 @@ function isValidTimeRange(startTime, endTime) {
   return startTime && endTime && startTime < endTime
 }
 
-function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
+function RoutinePlusPage({ initialRoutine = null, onClose, onCreated, onDeleted }) {
+  const initialCategoryCode = initialRoutine?.categoryCode ?? initialRoutine?.category
+
+  const isInitialTodo = initialCategoryCode === 'TO_DO'
+
   const initialCategory = findInitialCategory(initialRoutine)
+
   const routineId = initialRoutine?.routineId
   const isEditMode = Boolean(routineId)
 
-  const [screen, setScreen] = useState(initialCategory ? 'routine' : 'select')
+  const isTodoEditMode = isEditMode && isInitialTodo
+
+  const [screen, setScreen] = useState(
+    isInitialTodo ? 'todo' : initialCategory ? 'routine' : 'select',
+  )
+
   const [hoveredCategory, setHoveredCategory] = useState(null)
+
   const [selectedCategory, setSelectedCategory] = useState(initialCategory)
 
   const [routineName, setRoutineName] = useState(
     initialRoutine?.content ?? initialRoutine?.title ?? '',
   )
+
   const [selectedDays, setSelectedDays] = useState(getSelectedDays(initialRoutine))
+
   const [routineStartTime, setRoutineStartTime] = useState(normalizeTime(initialRoutine?.startTime))
+
   const [routineEndTime, setRoutineEndTime] = useState(normalizeTime(initialRoutine?.endTime))
+
   const [routineVerificationObject, setRoutineVerificationObject] = useState(
     initialRoutine?.verificationObject ?? initialRoutine?.recommendedVerificationObject ?? '',
   )
 
-  const [todoName, setTodoName] = useState('')
-  const [todoDate, setTodoDate] = useState('')
-  const [todoStartTime, setTodoStartTime] = useState('')
-  const [todoEndTime, setTodoEndTime] = useState('')
-  const [todoVerificationObject, setTodoVerificationObject] = useState('')
+  const [todoName, setTodoName] = useState(
+    isInitialTodo ? (initialRoutine?.content ?? initialRoutine?.title ?? '') : '',
+  )
+
+  const [todoDate, setTodoDate] = useState(
+    isInitialTodo ? (initialRoutine?.scheduledDate ?? '') : '',
+  )
+
+  const [todoStartTime, setTodoStartTime] = useState(
+    isInitialTodo ? normalizeTime(initialRoutine?.startTime) : '',
+  )
+
+  const [todoEndTime, setTodoEndTime] = useState(
+    isInitialTodo ? normalizeTime(initialRoutine?.endTime) : '',
+  )
+
+  const [todoVerificationObject, setTodoVerificationObject] = useState(
+    isInitialTodo ? (initialRoutine?.verificationObject ?? '') : '',
+  )
 
   const [verificationObjects, setVerificationObjects] = useState([])
+
   const [isRoutineLoading, setIsRoutineLoading] = useState(isEditMode)
+
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const [isDeleting, setIsDeleting] = useState(false)
+
   const [submitError, setSubmitError] = useState('')
 
   useEffect(() => {
     const handleEscape = (event) => {
-      if (event.key === 'Escape' && !isSubmitting) {
+      if (event.key === 'Escape' && !isSubmitting && !isDeleting) {
         onClose()
       }
     }
@@ -229,7 +264,7 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
     return () => {
       window.removeEventListener('keydown', handleEscape)
     }
-  }, [isSubmitting, onClose])
+  }, [isDeleting, isSubmitting, onClose])
 
   useEffect(() => {
     let isMounted = true
@@ -263,6 +298,17 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
         const routineDetail = await getRoutine(routineId)
 
         if (!isMounted) return
+
+        if (routineDetail.category === 'TO_DO') {
+          setScreen('todo')
+          setTodoName(routineDetail.content ?? '')
+          setTodoDate(routineDetail.scheduledDate ?? '')
+          setTodoStartTime(normalizeTime(routineDetail.startTime))
+          setTodoEndTime(normalizeTime(routineDetail.endTime))
+          setTodoVerificationObject(routineDetail.verificationObject ?? '')
+          setSubmitError('')
+          return
+        }
 
         const category = findInitialCategory(routineDetail)
 
@@ -401,6 +447,7 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
       }
     } catch (error) {
       console.error(`루틴을 ${isEditMode ? '수정' : '추가'}하지 못했습니다.`, error)
+
       setSubmitError(error.message ?? `루틴을 ${isEditMode ? '수정' : '추가'}하지 못했습니다.`)
     } finally {
       setIsSubmitting(false)
@@ -410,14 +457,31 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
   const handleTodoSubmit = async (event) => {
     event.preventDefault()
 
+    const trimmedTodoName = todoName.trim()
+
+    if (!trimmedTodoName) {
+      setSubmitError('투두 내용을 입력해 주세요.')
+      return
+    }
+
+    if (!todoDate) {
+      setSubmitError('투두 날짜를 선택해 주세요.')
+      return
+    }
+
     if (!isValidTimeRange(todoStartTime, todoEndTime)) {
       setSubmitError('종료 시간은 시작 시간보다 늦어야 합니다.')
       return
     }
 
-    const newTodo = {
+    if (!todoVerificationObject) {
+      setSubmitError('인증 물건을 선택해 주세요.')
+      return
+    }
+
+    const todoPayload = {
       category: 'TO_DO',
-      content: todoName.trim(),
+      content: trimmedTodoName,
       scheduledDate: todoDate,
       startTime: todoStartTime,
       endTime: todoEndTime,
@@ -430,25 +494,89 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
     setSubmitError('')
 
     try {
-      const createdTodo = await createRoutine(newTodo)
+      const savedTodo = isTodoEditMode
+        ? await updateRoutine(routineId, todoPayload)
+        : await createRoutine(todoPayload)
 
-      setIsSubmitting(false)
-      onCreated?.(createdTodo)
+      onCreated?.(savedTodo)
       onClose()
+
+      if (savedTodo?.appliedToCurrentServiceDate === false) {
+        const effectiveFrom = savedTodo.effectiveFrom
+
+        window.setTimeout(() => {
+          window.alert(
+            effectiveFrom
+              ? `저장되었습니다. 현재 투두는 이미 확정되어 ${effectiveFrom}부터 적용됩니다.`
+              : '저장되었습니다. 변경 내용은 다음 적용일부터 반영됩니다.',
+          )
+        }, 0)
+      }
     } catch (error) {
-      console.error('투두를 추가하지 못했습니다.', error)
-      setSubmitError(error.message ?? '투두를 추가하지 못했습니다.')
+      console.error(`투두를 ${isTodoEditMode ? '수정' : '추가'}하지 못했습니다.`, error)
+
+      setSubmitError(error.message ?? `투두를 ${isTodoEditMode ? '수정' : '추가'}하지 못했습니다.`)
+    } finally {
       setIsSubmitting(false)
     }
   }
 
+  const handleRoutineDelete = async () => {
+    if (!isEditMode || isSubmitting || isDeleting) {
+      return
+    }
+
+    const targetName = isTodoEditMode ? '투두' : '루틴'
+
+    const shouldDelete = window.confirm(
+      `이 ${targetName}를 삭제할까요?\n삭제한 ${targetName}는 홈 화면에서 제외됩니다.`,
+    )
+
+    if (!shouldDelete) return
+
+    setIsDeleting(true)
+    setSubmitError('')
+
+    try {
+      const deletedRoutine = await deleteRoutine(routineId)
+
+      onDeleted?.(routineId, deletedRoutine)
+      onClose()
+
+      if (deletedRoutine?.appliedToCurrentServiceDate === false) {
+        const effectiveFrom = deletedRoutine.effectiveFrom
+
+        window.setTimeout(() => {
+          window.alert(
+            effectiveFrom
+              ? `삭제되었습니다. 서버 일정에는 ${effectiveFrom}부터 반영됩니다.`
+              : '삭제되었습니다. 서버 일정에는 다음 반복일부터 반영됩니다.',
+          )
+        }, 0)
+      }
+    } catch (error) {
+      console.error(`${targetName}를 삭제하지 못했습니다.`, error)
+
+      if (error.status === 404 || error.code === 'ROUTINE_NOT_FOUND') {
+        onDeleted?.(routineId)
+        onClose()
+        return
+      }
+
+      setSubmitError(error.message ?? `${targetName}를 삭제하지 못했습니다.`)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
   const handleBackdropClick = (event) => {
-    if (event.target === event.currentTarget && !isSubmitting) {
+    if (event.target === event.currentTarget && !isSubmitting && !isDeleting) {
       onClose()
     }
   }
 
   const routineVerificationOptions = getVerificationOptions(routineVerificationObject)
+
   const todoVerificationOptions = getVerificationOptions(todoVerificationObject)
 
   return (
@@ -456,7 +584,7 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
       className='routinePlus__layer'
       role='dialog'
       aria-modal='true'
-      aria-label={isEditMode ? '루틴 수정' : '루틴 추가'}
+      aria-label={isTodoEditMode ? '투두 수정' : isEditMode ? '루틴 수정' : '루틴 추가'}
       onPointerDown={handleBackdropClick}
     >
       {screen === 'select' && (
@@ -521,7 +649,7 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
             type='button'
             className='routinePlus__dragHandle'
             aria-label='팝업 닫기'
-            disabled={isSubmitting}
+            disabled={isSubmitting || isDeleting}
             onClick={onClose}
           />
 
@@ -556,6 +684,7 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
                   value={routineName}
                   placeholder={selectedCategory.placeholder}
                   required
+                  disabled={isRoutineLoading}
                   onChange={(event) => setRoutineName(event.target.value)}
                 />
 
@@ -564,6 +693,7 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
                     type='button'
                     className='routinePlus__clearButton'
                     aria-label='루틴 내용 지우기'
+                    disabled={isRoutineLoading}
                     onClick={() => setRoutineName('')}
                   >
                     ×
@@ -665,10 +795,21 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
               </p>
             )}
 
+            {isEditMode && (
+              <button
+                type='button'
+                className='routinePlus__deleteButton'
+                disabled={isSubmitting || isDeleting || isRoutineLoading}
+                onClick={handleRoutineDelete}
+              >
+                {isDeleting ? '삭제 중...' : '루틴 삭제하기'}
+              </button>
+            )}
+
             <button
               type='submit'
               className='routinePlus__submitButton'
-              disabled={isSubmitting || isRoutineLoading}
+              disabled={isSubmitting || isDeleting || isRoutineLoading}
             >
               {isRoutineLoading
                 ? '불러오는 중...'
@@ -690,16 +831,18 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
             type='button'
             className='routinePlus__dragHandle'
             aria-label='팝업 닫기'
-            disabled={isSubmitting}
+            disabled={isSubmitting || isDeleting}
             onClick={onClose}
           />
 
           <form className='routinePlus__form' onSubmit={handleTodoSubmit}>
-            <h2 className='routinePlus__detailTitle'>투두 추가하기</h2>
+            <h2 className='routinePlus__detailTitle'>
+              투두 {isTodoEditMode ? '수정하기' : '추가하기'}
+            </h2>
 
             <div className='routinePlus__inputSection routinePlus__todoInputSection'>
               <label htmlFor='todo-name' className='routinePlus__sectionTitle'>
-                추가할 투두
+                {isTodoEditMode ? '수정할 투두' : '추가할 투두'}
               </label>
 
               <div className='routinePlus__textField'>
@@ -709,6 +852,7 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
                   value={todoName}
                   placeholder='영양제 챙기기'
                   required
+                  disabled={isRoutineLoading}
                   onChange={(event) => setTodoName(event.target.value)}
                 />
 
@@ -717,6 +861,7 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
                     type='button'
                     className='routinePlus__clearButton'
                     aria-label='투두 내용 지우기'
+                    disabled={isRoutineLoading}
                     onClick={() => setTodoName('')}
                   >
                     ×
@@ -737,6 +882,7 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
                     value={todoDate}
                     aria-label='날짜'
                     required
+                    disabled={isRoutineLoading}
                     onChange={(event) => setTodoDate(event.target.value)}
                   />
                 </label>
@@ -749,6 +895,7 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
                     value={todoStartTime}
                     aria-label='시작 시간'
                     required
+                    disabled={isRoutineLoading}
                     onChange={(event) => setTodoStartTime(event.target.value)}
                   />
                 </label>
@@ -761,6 +908,7 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
                     value={todoEndTime}
                     aria-label='종료 시간'
                     required
+                    disabled={isRoutineLoading}
                     onChange={(event) => setTodoEndTime(event.target.value)}
                   />
                 </label>
@@ -769,6 +917,7 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
                   label='인증 물건'
                   value={todoVerificationObject}
                   required
+                  disabled={isRoutineLoading}
                   onChange={(event) => setTodoVerificationObject(event.target.value)}
                 >
                   {todoVerificationOptions.map((item) => (
@@ -786,12 +935,31 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
               </p>
             )}
 
+            {isTodoEditMode && (
+              <button
+                type='button'
+                className='routinePlus__deleteButton'
+                disabled={isSubmitting || isDeleting || isRoutineLoading}
+                onClick={handleRoutineDelete}
+              >
+                {isDeleting ? '삭제 중...' : '투두 삭제하기'}
+              </button>
+            )}
+
             <button
               type='submit'
               className='routinePlus__submitButton routinePlus__todoSubmitButton'
-              disabled={isSubmitting}
+              disabled={isSubmitting || isDeleting || isRoutineLoading}
             >
-              {isSubmitting ? '추가 중...' : '투두 추가하기'}
+              {isRoutineLoading
+                ? '불러오는 중...'
+                : isSubmitting
+                  ? isTodoEditMode
+                    ? '수정 중...'
+                    : '추가 중...'
+                  : isTodoEditMode
+                    ? '투두 수정하기'
+                    : '투두 추가하기'}
             </button>
           </form>
         </section>

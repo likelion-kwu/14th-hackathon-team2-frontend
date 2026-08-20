@@ -68,18 +68,29 @@ export function createRoutineCardData(dailyRoutine, homeRoutine) {
   }
 }
 
-export function createTodoCardData(dailyRoutine) {
+export function createTodoCardData(dailyRoutine, serviceDate) {
   return {
     id: dailyRoutine.id,
     dailyRoutineId: dailyRoutine.id,
     routineId: dailyRoutine.routineId,
 
+    categoryCode: 'TO_DO',
+    category: 'To-do',
+    content: dailyRoutine.content,
+    theme: 'wellbeing',
+    characterImage: imageWellbeing,
+
     time: dailyRoutine.startTime ?? '시간 미지정',
     title: dailyRoutine.content,
+
+    scheduledDate: dailyRoutine.scheduledDate ?? serviceDate ?? '',
+    startTime: dailyRoutine.startTime,
+    endTime: dailyRoutine.endTime,
 
     status: dailyRoutine.status,
     isCompleted: dailyRoutine.status === 'COMPLETED',
 
+    verificationType: dailyRoutine.verification?.type ?? 'CHECK',
     verificationObject: dailyRoutine.verificationObject,
   }
 }
