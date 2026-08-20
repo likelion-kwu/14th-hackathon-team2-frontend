@@ -1,5 +1,18 @@
 import { apiRequest } from './apiClient'
 
+export function getSpeechStylePresets() {
+  return apiRequest('/speech-style/presets')
+}
+
+export function createSpeechStylePreset(presetCode) {
+  return apiRequest('/speech-style/preset', {
+    method: 'POST',
+    body: {
+      presetCode,
+    },
+  })
+}
+
 export function getSpeechStyle() {
   return apiRequest('/speech-style')
 }

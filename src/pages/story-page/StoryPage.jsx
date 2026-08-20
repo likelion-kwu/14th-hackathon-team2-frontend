@@ -12,7 +12,7 @@ function StoryPage() {
   const navigate = useNavigate()
 
   const handleBack = () => {
-    navigate('/avatarsetting')
+    navigate('/intro')
   }
 
   const handleStart = () => {

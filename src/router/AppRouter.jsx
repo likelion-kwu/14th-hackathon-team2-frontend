@@ -13,6 +13,8 @@ import SettingPage from '../pages/setting-page/entry/SettingPage'
 import StoryPage from '../pages/story-page/StoryPage'
 import TrackSettingPage from '../pages/tracksetting-page/TrackSettingPage'
 import VerificationPage from '../pages/verification-page/VerificationPage'
+import IntroPage from '../pages/intro-page/IntroPage'
+import EpisodePage from '../pages/episode-page/EpisodePage'
 
 export const AppRouter = createBrowserRouter([
   {
@@ -32,9 +34,14 @@ export const AppRouter = createBrowserRouter([
     path: '/avatarsetting',
     element: <AvatarSettingPage />,
   },
+  { path: '/intro', element: <IntroPage /> },
   {
     path: '/story',
     element: <StoryPage />,
+  },
+  {
+    path: '/episode',
+    element: <EpisodePage />,
   },
   {
     path: '/',
@@ -51,10 +58,6 @@ export const AppRouter = createBrowserRouter([
       {
         path: 'reflection',
         element: <ReflectionPage />,
-      },
-      {
-        path: 'routine',
-        element: <div>routine</div>,
       },
       {
         path: 'ranking',

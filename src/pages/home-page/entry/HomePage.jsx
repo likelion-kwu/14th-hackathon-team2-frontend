@@ -9,10 +9,12 @@ import {
   getRoutineRecommendations,
   ROUTINE_RECOMMENDATION_CATEGORIES,
 } from '../../../api/routineApi'
+import { getStories } from '../../../api/storyApi'
 import { getCurrentUser } from '../../../api/userApi'
 
 import ChatBubble from '../../../components/chat-bubble/ChatBubble'
 import HomeBottomSheet from '../component/bottom-sheet/HomeBottomSheet'
+import StoryUnlockPopup from '../component/story-unlock-popup/StoryUnlockPopup'
 
 import dummy from '../../../assets/avatar/avatar-default/dummy.png'
 
@@ -55,6 +57,41 @@ function getRecommendationArray(response) {
   return []
 }
 
+/* 사용자별 스토리 팝업 확인 기록 key */
+function getStoryStorageKey(userId) {
+  return `seen-story-unlocks-${userId}`
+}
+
+/* 이미 확인한 에피소드 번호 가져오기 */
+function getSeenStoryEpisodes(userId) {
+  if (!userId) return []
+
+  try {
+    const savedValue = localStorage.getItem(getStoryStorageKey(userId))
+
+    if (!savedValue) return []
+
+    const parsedValue = JSON.parse(savedValue)
+
+    return Array.isArray(parsedValue) ? parsedValue : []
+  } catch {
+    return []
+  }
+}
+
+/* 팝업을 확인한 에피소드 저장 */
+function saveSeenStoryEpisode(userId, episodeNumber) {
+  if (!userId) return
+
+  const seenEpisodes = getSeenStoryEpisodes(userId)
+
+  if (seenEpisodes.includes(episodeNumber)) {
+    return
+  }
+
+  localStorage.setItem(getStoryStorageKey(userId), JSON.stringify([...seenEpisodes, episodeNumber]))
+}
+
 function HomePage() {
   const {
     openRoutinePlus,
@@ -68,6 +105,7 @@ function HomePage() {
   const [isDialogueLoading, setIsDialogueLoading] = useState(false)
   const [chatContent, setChatContent] = useState('')
 
+  const [userId, setUserId] = useState(null)
   const [nickname, setNickname] = useState('')
   const [avatarImageUrl, setAvatarImageUrl] = useState('')
 
@@ -85,6 +123,8 @@ function HomePage() {
     completedDays: 0,
   })
 
+  const [unlockedStoryEpisode, setUnlockedStoryEpisode] = useState(null)
+
   const chatTimerRef = useRef(null)
 
   const avatarHeight = 400 - sheetProgress * 100
@@ -95,10 +135,11 @@ function HomePage() {
 
     const loadHomeData = async () => {
       try {
-        const [user, home, dailyRoutineData] = await Promise.all([
+        const [user, home, dailyRoutineData, storyData] = await Promise.all([
           getCurrentUser(),
           getHome(),
           getDailyRoutines(),
+          getStories(),
         ])
 
         if (!isMounted) return
@@ -129,6 +170,7 @@ function HomePage() {
 
           if (dailyRoutine.category === 'TO_DO') {
             todoRoutines.push(createTodoCardData(dailyRoutine, dailyRoutineData.serviceDate))
+
             return
           }
 
@@ -137,6 +179,7 @@ function HomePage() {
           )
         })
 
+        setUserId(user.id)
         setNickname(user.nickname ?? '')
         setRoutines(regularRoutines)
         setTodos(todoRoutines)
@@ -154,6 +197,28 @@ function HomePage() {
           streak: home.success?.currentStreakDays ?? 0,
           completedDays: Math.min(home.success?.currentStreakDays ?? 0, 7),
         })
+
+        /*
+         * 서버에서 unlocked=true인 에피소드 중
+         * 아직 팝업을 확인하지 않은 에피소드를 찾는다.
+         */
+        const episodes = storyData?.episodes ?? []
+
+        const seenEpisodes = getSeenStoryEpisodes(user.id)
+
+        const unseenUnlockedEpisodes = episodes
+          .filter((episode) => episode.unlocked && !seenEpisodes.includes(episode.episodeNumber))
+          .sort((first, second) => first.episodeNumber - second.episodeNumber)
+
+        /*
+         * 여러 개가 존재하면 가장 최근에 해금된
+         * 번호가 큰 에피소드를 우선 표시
+         */
+        if (unseenUnlockedEpisodes.length > 0) {
+          setUnlockedStoryEpisode(unseenUnlockedEpisodes[unseenUnlockedEpisodes.length - 1])
+        } else {
+          setUnlockedStoryEpisode(null)
+        }
       } catch (error) {
         console.error(error)
 
@@ -211,6 +276,7 @@ function HomePage() {
         if (isCancelled) return
 
         objectUrl = URL.createObjectURL(imageBlob)
+
         setAvatarImageUrl(objectUrl)
       } catch (error) {
         console.error('아바타 이미지를 불러오지 못했습니다.', error)
@@ -268,6 +334,34 @@ function HomePage() {
     }
   }
 
+  /*
+   * X 버튼
+   *
+   * 팝업을 닫아도 사용자가 이미 확인한 것으로 처리해서
+   * 다음 홈 진입 때 다시 뜨지 않도록 한다.
+   */
+  const handleStoryUnlockClose = () => {
+    if (!unlockedStoryEpisode) return
+
+    saveSeenStoryEpisode(userId, unlockedStoryEpisode.episodeNumber)
+
+    setUnlockedStoryEpisode(null)
+  }
+
+  /*
+   * 스토리 보기
+   *
+   * EpisodePage로 이동하기 전에
+   * 팝업 확인 완료 상태를 저장한다.
+   */
+  const handleStoryUnlockView = () => {
+    if (!unlockedStoryEpisode) return
+
+    saveSeenStoryEpisode(userId, unlockedStoryEpisode.episodeNumber)
+
+    setUnlockedStoryEpisode(null)
+  }
+
   return (
     <div className='home__container'>
       <div
@@ -311,6 +405,14 @@ function HomePage() {
         onRoutineEdit={openRoutinePlus}
         onDragProgress={setSheetProgress}
       />
+
+      {unlockedStoryEpisode && (
+        <StoryUnlockPopup
+          episode={unlockedStoryEpisode}
+          onClose={handleStoryUnlockClose}
+          onView={handleStoryUnlockView}
+        />
+      )}
     </div>
   )
 }
