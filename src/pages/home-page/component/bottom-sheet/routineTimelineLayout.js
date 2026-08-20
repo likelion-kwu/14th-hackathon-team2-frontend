@@ -4,11 +4,11 @@ export const TIMELINE_END_MINUTES = 24 * 60
 export const ROUTINE_CARD_HEIGHT = 64
 export const ROUTINE_CARD_GAP = 10
 
-const TIMELINE_TOP_PADDING = 42
-const TIMELINE_BOTTOM_PADDING = 42
+const TIMELINE_TOP_PADDING = 50
+const TIMELINE_BOTTOM_PADDING = 50
 
-// 1시간당 12px
-const PIXELS_PER_MINUTE = 0.2
+// 1시간당 18px
+const PIXELS_PER_MINUTE = 0.3
 
 // 루틴 한 개가 추가될 때 늘어나는 높이
 const ROUTINE_ROW_HEIGHT = ROUTINE_CARD_HEIGHT + ROUTINE_CARD_GAP
@@ -19,6 +19,7 @@ export function parseTimeToMinutes(time) {
   }
 
   const [hourText, minuteText] = time.split(':')
+
   const hour = Number(hourText)
   const minute = Number(minuteText)
 
@@ -54,6 +55,7 @@ export function createRoutineTimelineLayout(routines = []) {
 
   const positionedRoutines = sortedRoutines.map((item, index) => ({
     routine: item.routine,
+
     top:
       TIMELINE_TOP_PADDING +
       (item.minutes - TIMELINE_START_MINUTES) * PIXELS_PER_MINUTE +
@@ -65,9 +67,13 @@ export function createRoutineTimelineLayout(routines = []) {
 
   return {
     height: endY + TIMELINE_BOTTOM_PADDING,
+
     startY: getYForMinutes(TIMELINE_START_MINUTES),
+
     endY,
+
     positionedRoutines,
+
     getYForMinutes,
   }
 }

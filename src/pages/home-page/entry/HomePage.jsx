@@ -50,9 +50,7 @@ function getDialogueSituation(routines, progress, achievementData) {
 
 function getRecommendationArray(response) {
   if (Array.isArray(response)) return response
-  if (Array.isArray(response?.data)) {
-    return response.data
-  }
+  if (Array.isArray(response?.data)) return response.data
 
   return []
 }
@@ -136,7 +134,6 @@ function HomePage() {
         })
       } catch (error) {
         console.error(error)
-
         alert(error.message ?? '홈 정보를 불러오지 못했습니다.')
       }
     }
@@ -288,6 +285,7 @@ function HomePage() {
         recommendedRoutines={recommendedRoutines}
         isRoutinePlusOpen={isRoutinePlusOpen}
         onRecommendedRoutineAdd={openRoutinePlus}
+        onRoutineEdit={openRoutinePlus}
         onDragProgress={setSheetProgress}
       />
     </div>

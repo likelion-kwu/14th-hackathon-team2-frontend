@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react'
 
-import { createRoutine, getVerificationObjects } from '../../api/routineApi'
+import {
+  createRoutine,
+  getRoutine,
+  getVerificationObjects,
+  updateRoutine,
+} from '../../api/routineApi'
 
 import skinDefault from '../../assets/icons/icons-track/image-skin-default.svg'
 import skinActive from '../../assets/icons/icons-track/image-skin-active.svg'
@@ -65,39 +70,6 @@ const CATEGORY_LIST = [
   },
 ]
 
-const DAY_OPTIONS = [
-  {
-    code: 'MON',
-    label: '월',
-  },
-  {
-    code: 'TUE',
-    label: '화',
-  },
-  {
-    code: 'WED',
-    label: '수',
-  },
-  {
-    code: 'THU',
-    label: '목',
-  },
-  {
-    code: 'FRI',
-    label: '금',
-  },
-  {
-    code: 'SAT',
-    label: '토',
-  },
-  {
-    code: 'SUN',
-    label: '일',
-  },
-]
-
-const ALL_DAY_CODES = DAY_OPTIONS.map((day) => day.code)
-
 const VERIFICATION_OBJECT_LABELS = {
   CUP: '컵',
   WATER_BOTTLE: '물병',
@@ -107,13 +79,31 @@ const VERIFICATION_OBJECT_LABELS = {
   SUPPLEMENT_CONTAINER: '영양제 용기',
 }
 
-function SettingSelect({ label, value, onChange, children, required = false }) {
+const DAY_OPTIONS = [
+  { code: 'MON', label: '월' },
+  { code: 'TUE', label: '화' },
+  { code: 'WED', label: '수' },
+  { code: 'THU', label: '목' },
+  { code: 'FRI', label: '금' },
+  { code: 'SAT', label: '토' },
+  { code: 'SUN', label: '일' },
+]
+
+const ALL_DAY_CODES = DAY_OPTIONS.map((day) => day.code)
+
+function SettingSelect({ label, value, onChange, children, required = false, disabled = false }) {
   return (
     <label className='routinePlus__settingRow'>
       <span className='routinePlus__settingLabel'>{label}</span>
 
       <span className='routinePlus__settingControl'>
-        <select value={value} aria-label={label} required={required} onChange={onChange}>
+        <select
+          value={value}
+          aria-label={label}
+          required={required}
+          disabled={disabled}
+          onChange={onChange}
+        >
           <option value=''>선택</option>
           {children}
         </select>
@@ -127,9 +117,7 @@ function SettingSelect({ label, value, onChange, children, required = false }) {
 }
 
 function findInitialCategory(initialRoutine) {
-  if (!initialRoutine) return null
-
-  const categoryCode = initialRoutine.categoryCode ?? initialRoutine.category
+  const categoryCode = initialRoutine?.categoryCode ?? initialRoutine?.category
 
   return CATEGORY_LIST.find((category) => category.code === categoryCode) ?? null
 }
@@ -139,17 +127,13 @@ function getVerificationObjectLabel(code) {
 }
 
 function normalizeVerificationObjects(response) {
-  let objects = []
-
-  if (Array.isArray(response)) {
-    objects = response
-  } else if (Array.isArray(response?.data)) {
-    objects = response.data
-  } else if (Array.isArray(response?.items)) {
-    objects = response.items
-  } else if (Array.isArray(response?.verificationObjects)) {
-    objects = response.verificationObjects
-  }
+  const objects = Array.isArray(response)
+    ? response
+    : (response?.data ??
+      response?.items ??
+      response?.objects ??
+      response?.verificationObjects ??
+      [])
 
   return objects
     .map((item) => {
@@ -173,9 +157,7 @@ function normalizeVerificationObjects(response) {
 }
 
 function getRepeatPayload(selectedDays) {
-  const orderedDays = DAY_OPTIONS.map((day) => day.code).filter((code) =>
-    selectedDays.includes(code),
-  )
+  const orderedDays = ALL_DAY_CODES.filter((code) => selectedDays.includes(code))
 
   if (orderedDays.length === ALL_DAY_CODES.length) {
     return {
@@ -189,29 +171,39 @@ function getRepeatPayload(selectedDays) {
   }
 }
 
+function normalizeTime(time) {
+  return typeof time === 'string' ? time.slice(0, 5) : ''
+}
+
+function getSelectedDays(routine) {
+  if (routine?.repeatType === 'DAILY') {
+    return [...ALL_DAY_CODES]
+  }
+
+  return Array.isArray(routine?.daysOfWeek) ? routine.daysOfWeek : []
+}
+
 function isValidTimeRange(startTime, endTime) {
   return startTime && endTime && startTime < endTime
 }
 
 function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
   const initialCategory = findInitialCategory(initialRoutine)
+  const routineId = initialRoutine?.routineId
+  const isEditMode = Boolean(routineId)
 
   const [screen, setScreen] = useState(initialCategory ? 'routine' : 'select')
-
   const [hoveredCategory, setHoveredCategory] = useState(null)
-
   const [selectedCategory, setSelectedCategory] = useState(initialCategory)
 
   const [routineName, setRoutineName] = useState(
     initialRoutine?.content ?? initialRoutine?.title ?? '',
   )
-
-  const [selectedDays, setSelectedDays] = useState([])
-  const [routineStartTime, setRoutineStartTime] = useState('')
-  const [routineEndTime, setRoutineEndTime] = useState('')
-
+  const [selectedDays, setSelectedDays] = useState(getSelectedDays(initialRoutine))
+  const [routineStartTime, setRoutineStartTime] = useState(normalizeTime(initialRoutine?.startTime))
+  const [routineEndTime, setRoutineEndTime] = useState(normalizeTime(initialRoutine?.endTime))
   const [routineVerificationObject, setRoutineVerificationObject] = useState(
-    initialRoutine?.recommendedVerificationObject ?? '',
+    initialRoutine?.verificationObject ?? initialRoutine?.recommendedVerificationObject ?? '',
   )
 
   const [todoName, setTodoName] = useState('')
@@ -221,9 +213,8 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
   const [todoVerificationObject, setTodoVerificationObject] = useState('')
 
   const [verificationObjects, setVerificationObjects] = useState([])
-
+  const [isRoutineLoading, setIsRoutineLoading] = useState(isEditMode)
   const [isSubmitting, setIsSubmitting] = useState(false)
-
   const [submitError, setSubmitError] = useState('')
 
   useEffect(() => {
@@ -262,6 +253,50 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
     }
   }, [])
 
+  useEffect(() => {
+    if (!isEditMode) return undefined
+
+    let isMounted = true
+
+    const loadRoutineDetail = async () => {
+      try {
+        const routineDetail = await getRoutine(routineId)
+
+        if (!isMounted) return
+
+        const category = findInitialCategory(routineDetail)
+
+        if (!category) {
+          throw new Error('수정할 루틴의 카테고리를 확인하지 못했습니다.')
+        }
+
+        setSelectedCategory(category)
+        setRoutineName(routineDetail.content ?? '')
+        setSelectedDays(getSelectedDays(routineDetail))
+        setRoutineStartTime(normalizeTime(routineDetail.startTime))
+        setRoutineEndTime(normalizeTime(routineDetail.endTime))
+        setRoutineVerificationObject(routineDetail.verificationObject ?? '')
+        setSubmitError('')
+      } catch (error) {
+        console.error('루틴 상세 정보를 불러오지 못했습니다.', error)
+
+        if (isMounted) {
+          setSubmitError(error.message ?? '루틴 정보를 불러오지 못했습니다.')
+        }
+      } finally {
+        if (isMounted) {
+          setIsRoutineLoading(false)
+        }
+      }
+    }
+
+    loadRoutineDetail()
+
+    return () => {
+      isMounted = false
+    }
+  }, [isEditMode, routineId])
+
   const getVerificationOptions = (selectedValue) => {
     if (!selectedValue || verificationObjects.some((item) => item.code === selectedValue)) {
       return verificationObjects
@@ -281,6 +316,7 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
     setSubmitError('')
     setScreen('routine')
   }
+
   const handleDayClick = (dayCode) => {
     setSelectedDays((previousDays) => {
       if (previousDays.includes(dayCode)) {
@@ -304,13 +340,14 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
 
     setSubmitError('')
   }
+
   const handleRoutineSubmit = async (event) => {
     event.preventDefault()
 
     const trimmedRoutineName = routineName.trim()
 
     if (!trimmedRoutineName) {
-      setSubmitError('추가할 루틴을 입력해 주세요.')
+      setSubmitError('루틴 내용을 입력해 주세요.')
       return
     }
 
@@ -331,7 +368,7 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
 
     const repeatPayload = getRepeatPayload(selectedDays)
 
-    const newRoutine = {
+    const routinePayload = {
       category: selectedCategory.code,
       content: trimmedRoutineName,
       startTime: routineStartTime,
@@ -344,30 +381,32 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
     setSubmitError('')
 
     try {
-      const createdRoutine = await createRoutine(newRoutine)
+      const savedRoutine = isEditMode
+        ? await updateRoutine(routineId, routinePayload)
+        : await createRoutine(routinePayload)
 
-      onCreated?.(createdRoutine)
+      onCreated?.(savedRoutine)
       onClose()
 
-      if (createdRoutine?.appliedToCurrentServiceDate === false) {
-        const effectiveFrom = createdRoutine.effectiveFrom
+      if (savedRoutine?.appliedToCurrentServiceDate === false) {
+        const effectiveFrom = savedRoutine.effectiveFrom
 
         window.setTimeout(() => {
           window.alert(
             effectiveFrom
-              ? `루틴이 추가되었습니다. 오늘의 루틴은 이미 시작되어 ${effectiveFrom}부터 적용됩니다.`
-              : '루틴이 추가되었습니다. 오늘의 루틴은 이미 시작되어 다음 반복일부터 적용됩니다.',
+              ? `저장되었습니다. 오늘 루틴은 이미 확정되어 ${effectiveFrom}부터 적용됩니다.`
+              : '저장되었습니다. 오늘 루틴은 이미 확정되어 다음 반복일부터 적용됩니다.',
           )
         }, 0)
       }
     } catch (error) {
-      console.error('루틴을 추가하지 못했습니다.', error)
-
-      setSubmitError(error.message ?? '루틴을 추가하지 못했습니다.')
+      console.error(`루틴을 ${isEditMode ? '수정' : '추가'}하지 못했습니다.`, error)
+      setSubmitError(error.message ?? `루틴을 ${isEditMode ? '수정' : '추가'}하지 못했습니다.`)
     } finally {
       setIsSubmitting(false)
     }
   }
+
   const handleTodoSubmit = async (event) => {
     event.preventDefault()
 
@@ -398,9 +437,7 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
       onClose()
     } catch (error) {
       console.error('투두를 추가하지 못했습니다.', error)
-
       setSubmitError(error.message ?? '투두를 추가하지 못했습니다.')
-
       setIsSubmitting(false)
     }
   }
@@ -412,7 +449,6 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
   }
 
   const routineVerificationOptions = getVerificationOptions(routineVerificationObject)
-
   const todoVerificationOptions = getVerificationOptions(todoVerificationObject)
 
   return (
@@ -420,7 +456,7 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
       className='routinePlus__layer'
       role='dialog'
       aria-modal='true'
-      aria-label='루틴 추가'
+      aria-label={isEditMode ? '루틴 수정' : '루틴 추가'}
       onPointerDown={handleBackdropClick}
     >
       {screen === 'select' && (
@@ -491,7 +527,7 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
 
           <form className='routinePlus__form' onSubmit={handleRoutineSubmit}>
             <h2 className='routinePlus__detailTitle'>
-              <span>{selectedCategory.name}</span> 루틴 추가하기
+              <span>{selectedCategory.name}</span> 루틴 {isEditMode ? '수정하기' : '추가하기'}
             </h2>
 
             <div className='routinePlus__characterArea'>
@@ -504,13 +540,13 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
               <p className='routinePlus__speechBubble'>
                 시간과 요일을 확인한 뒤
                 <br />
-                루틴을 추가해 주세요
+                루틴을 {isEditMode ? '수정해' : '추가해'} 주세요
               </p>
             </div>
 
             <div className='routinePlus__inputSection'>
               <label htmlFor='routine-name' className='routinePlus__sectionTitle'>
-                추가할 루틴
+                {isEditMode ? '수정할 루틴' : '추가할 루틴'}
               </label>
 
               <div className='routinePlus__textField'>
@@ -552,6 +588,7 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
                           : ''
                       }`}
                       aria-pressed={selectedDays.length === ALL_DAY_CODES.length}
+                      disabled={isRoutineLoading}
                       onClick={handleEverydayClick}
                     >
                       매일
@@ -570,6 +607,7 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
                             isSelected ? 'routinePlus__dayButton--selected' : ''
                           }`}
                           aria-pressed={isSelected}
+                          disabled={isRoutineLoading}
                           onClick={() => handleDayClick(day.code)}
                         >
                           {day.label}
@@ -587,6 +625,7 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
                     value={routineStartTime}
                     aria-label='시작 시간'
                     required
+                    disabled={isRoutineLoading}
                     onChange={(event) => setRoutineStartTime(event.target.value)}
                   />
                 </label>
@@ -599,6 +638,7 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
                     value={routineEndTime}
                     aria-label='종료 시간'
                     required
+                    disabled={isRoutineLoading}
                     onChange={(event) => setRoutineEndTime(event.target.value)}
                   />
                 </label>
@@ -607,6 +647,7 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
                   label='인증 물건'
                   value={routineVerificationObject}
                   required
+                  disabled={isRoutineLoading}
                   onChange={(event) => setRoutineVerificationObject(event.target.value)}
                 >
                   {routineVerificationOptions.map((item) => (
@@ -624,8 +665,20 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
               </p>
             )}
 
-            <button type='submit' className='routinePlus__submitButton' disabled={isSubmitting}>
-              {isSubmitting ? '추가 중...' : '루틴 추가하기'}
+            <button
+              type='submit'
+              className='routinePlus__submitButton'
+              disabled={isSubmitting || isRoutineLoading}
+            >
+              {isRoutineLoading
+                ? '불러오는 중...'
+                : isSubmitting
+                  ? isEditMode
+                    ? '수정 중...'
+                    : '추가 중...'
+                  : isEditMode
+                    ? '루틴 수정하기'
+                    : '루틴 추가하기'}
             </button>
           </form>
         </section>

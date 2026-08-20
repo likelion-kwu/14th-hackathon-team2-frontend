@@ -5,13 +5,12 @@ import { claimRoutinePoint } from '../../../../../api/pointApi'
 
 import './RoutineCard.css'
 
-function RoutineCard({ routine, onReceivePoint }) {
+function RoutineCard({ routine, onReceivePoint, onEdit }) {
   const navigate = useNavigate()
 
   const claimingRef = useRef(false)
 
   const [isClaiming, setIsClaiming] = useState(false)
-
   const [claimedLocally, setClaimedLocally] = useState(false)
 
   const {
@@ -22,14 +21,16 @@ function RoutineCard({ routine, onReceivePoint }) {
     isCompleted,
     rewardPoint,
     dailyRoutineId,
+    routineId,
     pointClaim,
   } = routine
 
   const isPointClaimed = Boolean(pointClaim?.claimed) || claimedLocally
-
   const isPointClaimable = Boolean(pointClaim?.claimable) && !isPointClaimed
 
-  const handleVerificationClick = () => {
+  const handleVerificationClick = (event) => {
+    event.stopPropagation()
+
     if (isCompleted) return
 
     navigate('/verification', {
@@ -39,7 +40,18 @@ function RoutineCard({ routine, onReceivePoint }) {
     })
   }
 
-  const handlePointClaim = async () => {
+  const handleEditClick = () => {
+    if (!routineId) {
+      alert('수정할 루틴 정보를 찾지 못했습니다.')
+      return
+    }
+
+    onEdit?.(routine)
+  }
+
+  const handlePointClaim = async (event) => {
+    event.stopPropagation()
+
     if (!dailyRoutineId || !isPointClaimable || claimingRef.current) {
       return
     }
@@ -49,11 +61,9 @@ function RoutineCard({ routine, onReceivePoint }) {
 
     try {
       const result = await claimRoutinePoint(dailyRoutineId)
-
       const awardedPoints = result?.awardedPoints ?? rewardPoint
 
       setClaimedLocally(true)
-
       onReceivePoint?.(awardedPoints)
     } catch (error) {
       console.error('포인트 수령 실패:', error)
@@ -71,17 +81,9 @@ function RoutineCard({ routine, onReceivePoint }) {
   }
 
   const getPointButtonText = () => {
-    if (isClaiming) {
-      return '받는 중...'
-    }
-
-    if (isPointClaimed) {
-      return `${rewardPoint}P 받음`
-    }
-
-    if (!isPointClaimable) {
-      return '수령 불가'
-    }
+    if (isClaiming) return '받는 중...'
+    if (isPointClaimed) return `${rewardPoint}P 받음`
+    if (!isPointClaimable) return '수령 불가'
 
     return `${rewardPoint}P 받기`
   }
@@ -89,6 +91,7 @@ function RoutineCard({ routine, onReceivePoint }) {
   return (
     <article
       className={`routineCard routineCard--${theme} ${isCompleted ? 'routineCard--completed' : ''}`}
+      onClick={handleEditClick}
     >
       <button
         type='button'
@@ -100,7 +103,6 @@ function RoutineCard({ routine, onReceivePoint }) {
 
       <div className='routineCard__text'>
         <span className='routineCard__category'>{category}</span>
-
         <span className='routineCard__title'>{title}</span>
       </div>
 
