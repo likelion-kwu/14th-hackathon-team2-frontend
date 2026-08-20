@@ -4,6 +4,7 @@ import './HomePage.css'
 
 import { getHome, getDailyRoutines } from '../../../api/homeApi'
 import { getCurrentUser } from '../../../api/userApi'
+import { getAvatarImage } from '../../../api/avatarApi'
 
 import ChatBubble from '../../../components/chat-bubble/ChatBubble'
 import HomeBottomSheet from '../component/bottom-sheet/HomeBottomSheet'
@@ -21,12 +22,16 @@ function HomePage() {
   const [chatContent, setChatContent] = useState('')
 
   const [nickname, setNickname] = useState('')
+  const [avatarImageUrl, setAvatarImageUrl] = useState('')
+
   const [routines, setRoutines] = useState([])
   const [todos, setTodos] = useState([])
+
   const [progress, setProgress] = useState({
     completedCount: 0,
     totalCount: 0,
   })
+
   const [achievementData, setAchievementData] = useState({
     streak: 0,
     completedDays: 0,
@@ -37,6 +42,7 @@ function HomePage() {
   const avatarHeight = 400 - sheetProgress * 100
   const avatarTranslateY = -sheetProgress * 30
 
+  // 홈 기본 정보 불러오기
   useEffect(() => {
     let isMounted = true
 
@@ -50,14 +56,17 @@ function HomePage() {
 
         if (!isMounted) return
 
+        const homeRoutines = home.routines ?? []
+        const dailyRoutines = dailyRoutineData.routines ?? []
+
         const homeRoutineMap = new Map(
-          home.routines.map((routine) => [routine.dailyRoutineId, routine]),
+          homeRoutines.map((routine) => [routine.dailyRoutineId, routine]),
         )
 
         const regularRoutines = []
         const todoRoutines = []
 
-        dailyRoutineData.routines.forEach((dailyRoutine) => {
+        dailyRoutines.forEach((dailyRoutine) => {
           if (dailyRoutine.category === 'TO_DO') {
             todoRoutines.push(createTodoCardData(dailyRoutine))
             return
@@ -73,17 +82,16 @@ function HomePage() {
         setTodos(todoRoutines)
 
         setProgress({
-          completedCount: home.progress.completedCount,
-          totalCount: home.progress.totalCount,
+          completedCount: home.progress?.completedCount ?? 0,
+          totalCount: home.progress?.totalCount ?? 0,
         })
 
         setAchievementData({
-          streak: home.success.currentStreakDays,
-          completedDays: Math.min(home.success.currentStreakDays, 7),
+          streak: home.success?.currentStreakDays ?? 0,
+          completedDays: Math.min(home.success?.currentStreakDays ?? 0, 7),
         })
       } catch (error) {
         console.error(error)
-
         alert(error.message ?? '홈 정보를 불러오지 못했습니다.')
       }
     }
@@ -92,7 +100,41 @@ function HomePage() {
 
     return () => {
       isMounted = false
+    }
+  }, [])
 
+  // 실제 아바타 이미지 불러오기
+  useEffect(() => {
+    let objectUrl = ''
+    let isCancelled = false
+
+    const loadAvatarImage = async () => {
+      try {
+        const imageBlob = await getAvatarImage()
+
+        if (isCancelled) return
+
+        objectUrl = URL.createObjectURL(imageBlob)
+        setAvatarImageUrl(objectUrl)
+      } catch (error) {
+        console.error('아바타 이미지를 불러오지 못했습니다.', error)
+      }
+    }
+
+    loadAvatarImage()
+
+    return () => {
+      isCancelled = true
+
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl)
+      }
+    }
+  }, [])
+
+  // 페이지를 나갈 때 채팅 타이머 정리
+  useEffect(() => {
+    return () => {
       if (chatTimerRef.current) {
         clearTimeout(chatTimerRef.current)
       }
@@ -141,7 +183,7 @@ function HomePage() {
         }}
       >
         <img
-          src={dummy}
+          src={avatarImageUrl || dummy}
           className='home__avatar'
           alt='내 아바타'
           onClick={handleAvatarClick}

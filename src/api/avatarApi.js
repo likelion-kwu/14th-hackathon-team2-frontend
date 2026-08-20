@@ -14,3 +14,8 @@ export function createAvatar({ growthTrack, facePhoto }) {
     body: formData,
   })
 }
+export function getAvatarImage() {
+  return apiRequest('/avatars/me/image', {
+    responseType: 'blob',
+  })
+}
