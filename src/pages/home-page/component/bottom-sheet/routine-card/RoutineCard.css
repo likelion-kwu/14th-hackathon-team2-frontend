@@ -7,6 +7,7 @@
   box-sizing: border-box;
   border-radius: 18px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
 }
 
 .routineCard--skin {
@@ -109,16 +110,13 @@
   white-space: nowrap;
   cursor: pointer;
 }
-.routineCard__check:disabled {
-  cursor: default;
-}
-.routineCard__reward-button--claimed {
-  background-color: #c6c6c6;
+
+.routineCard__reward-button--claimed,
+.routineCard__reward-button:disabled {
+  background-color: #d7d7d7;
   color: #ffffff;
   cursor: default;
-  box-shadow: none;
 }
-
-.routineCard__reward-button--claimed:disabled {
-  opacity: 1;
+.routineCard__check:disabled {
+  cursor: default;
 }

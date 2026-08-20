@@ -18,3 +18,14 @@ export function createRoutine(routine) {
     body: routine,
   })
 }
+
+export function getRoutine(routineId) {
+  return apiRequest(`/routines/${routineId}`)
+}
+
+export function updateRoutine(routineId, routine) {
+  return apiRequest(`/routines/${routineId}`, {
+    method: 'PATCH',
+    body: routine,
+  })
+}

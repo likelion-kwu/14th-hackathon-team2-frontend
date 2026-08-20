@@ -22,17 +22,15 @@ function HomeBottomSheet({
   progress,
   recommendedRoutines = [],
   onRecommendedRoutineAdd,
+  onRoutineEdit,
   isRoutinePlusOpen = false,
 }) {
   const [sheetState, setSheetState] = useState('closed')
-
   const [dragY, setDragY] = useState(null)
-
   const [pointToast, setPointToast] = useState(null)
-
   const [isEpisodeOpen, setIsEpisodeOpen] = useState(false)
-
   const [isAchievementOpen, setIsAchievementOpen] = useState(false)
+  const [isContentScrolled, setIsContentScrolled] = useState(false)
 
   const startYRef = useRef(0)
   const startTranslateRef = useRef(0)
@@ -125,15 +123,20 @@ function HomeBottomSheet({
     }, 2000)
   }
 
-  const currentTranslate = getCurrentTranslate()
+  const handleContentScroll = (event) => {
+    const scrollTop = event.currentTarget.scrollTop
 
+    setIsContentScrolled(scrollTop > 20)
+  }
+
+  const currentTranslate = getCurrentTranslate()
   const recommendationProgress = getProgress(currentTranslate)
 
   const completedTodoCount = todos.filter((todo) => todo.isCompleted).length
 
   const isPopupOpen = isEpisodeOpen || isAchievementOpen || isRoutinePlusOpen
 
-  const recommendationOpacity = isPopupOpen ? 0 : recommendationProgress
+  const recommendationOpacity = isPopupOpen || isContentScrolled ? 0 : recommendationProgress
 
   return (
     <div
@@ -162,7 +165,7 @@ function HomeBottomSheet({
         onStoryClick={() => setIsEpisodeOpen(true)}
       />
 
-      <div className='bottomSheet__content'>
+      <div className='bottomSheet__content' onScroll={handleContentScroll}>
         <section className='bottomSheet__routine-section'>
           <RoutineTimeline
             sunImage={TIMELINE_IMAGES.sun}
@@ -184,7 +187,11 @@ function HomeBottomSheet({
                   top: `${top}px`,
                 }}
               >
-                <RoutineCard routine={routine} onReceivePoint={handleReceivePoint} />
+                <RoutineCard
+                  routine={routine}
+                  onReceivePoint={handleReceivePoint}
+                  onEdit={onRoutineEdit}
+                />
               </div>
             ))}
           </div>
