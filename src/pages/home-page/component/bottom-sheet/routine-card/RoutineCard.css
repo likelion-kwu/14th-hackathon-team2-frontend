@@ -112,3 +112,13 @@
 .routineCard__check:disabled {
   cursor: default;
 }
+.routineCard__reward-button--claimed {
+  background-color: #c6c6c6;
+  color: #ffffff;
+  cursor: default;
+  box-shadow: none;
+}
+
+.routineCard__reward-button--claimed:disabled {
+  opacity: 1;
+}

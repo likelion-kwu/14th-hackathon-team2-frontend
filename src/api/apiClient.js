@@ -3,30 +3,32 @@ import { getAccessToken } from '../auth/tokenStorage'
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 export class ApiError extends Error {
-  constructor({ message, status = 0, code = 'UNKNOWN_ERROR', details = [] }) {
+  constructor({ message, status = 0, code = 'UNKNOWN_ERROR', details = [], data = null }) {
     super(message)
 
     this.name = 'ApiError'
     this.status = status
     this.code = code
     this.details = details
+    this.data = data
   }
 }
 
 function createRequestUrl(path) {
   const baseUrl = API_BASE_URL.replace(/\/$/, '')
+
   const endpoint = path.replace(/^\//, '')
 
   return `${baseUrl}/${endpoint}`
 }
 
 async function parseResponse(response, responseType) {
-  if (response.status === 204) {
-    return null
+  if (responseType === 'blob') {
+    return response.blob()
   }
 
-  if (responseType === 'blob' && response.ok) {
-    return response.blob()
+  if (response.status === 204) {
+    return null
   }
 
   const responseText = await response.text()
@@ -57,7 +59,7 @@ export async function apiRequest(
       throw new ApiError({
         status: 401,
         code: 'UNAUTHORIZED',
-        message: '저장된 사용자 정보가 없습니다.',
+        message: '저장된 로그인 정보가 없습니다. 처음부터 다시 시작해 주세요.',
       })
     }
 
@@ -66,6 +68,7 @@ export async function apiRequest(
 
   if (body != null && !(body instanceof FormData) && typeof body === 'object') {
     requestHeaders.set('Content-Type', 'application/json')
+
     requestBody = JSON.stringify(body)
   }
 
@@ -81,11 +84,11 @@ export async function apiRequest(
   } catch {
     throw new ApiError({
       code: 'NETWORK_ERROR',
-      message: '서버에 연결하지 못했습니다.',
+      message: '서버에 연결하지 못했습니다. 인터넷 연결을 확인해 주세요.',
     })
   }
 
-  const payload = await parseResponse(response, responseType)
+  const payload = await parseResponse(response, response.ok ? responseType : 'json')
 
   if (!response.ok) {
     throw new ApiError({
@@ -93,6 +96,7 @@ export async function apiRequest(
       code: payload?.code ?? 'HTTP_ERROR',
       message: payload?.message ?? '요청을 처리하지 못했습니다.',
       details: payload?.details ?? [],
+      data: payload?.data ?? null,
     })
   }
 

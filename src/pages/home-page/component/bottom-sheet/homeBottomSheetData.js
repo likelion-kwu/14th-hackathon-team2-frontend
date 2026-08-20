@@ -41,6 +41,8 @@ export function createRoutineCardData(dailyRoutine, homeRoutine) {
   const verificationType =
     homeRoutine?.verificationType ?? dailyRoutine.verification?.type ?? 'CHECK'
 
+  const pointClaim = dailyRoutine.pointClaim ?? homeRoutine?.pointClaim ?? null
+
   return {
     id: dailyRoutine.id,
     dailyRoutineId: dailyRoutine.id,
@@ -60,9 +62,9 @@ export function createRoutineCardData(dailyRoutine, homeRoutine) {
     verificationType,
     verificationObject: dailyRoutine.verificationObject,
 
-    pointClaim: dailyRoutine.pointClaim ?? null,
+    pointClaim,
 
-    rewardPoint: dailyRoutine.pointClaim?.rewardPoints ?? (verificationType === 'PHOTO' ? 10 : 5),
+    rewardPoint: pointClaim?.rewardPoints ?? (verificationType === 'PHOTO' ? 10 : 5),
   }
 }
 
