@@ -1,42 +1,148 @@
-import { useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
+
 import './CustomizePage.css'
+
+import { getAvatarImage, selectAvatarDialogue } from '../../../api/avatarApi'
+import { getHome } from '../../../api/homeApi'
+
 import ChatBubble from '../../../components/chat-bubble/ChatBubble'
+
 import dummy from '../../../assets/avatar/avatar-default/dummy.png'
+
 import CatalogBottomSheet from '../component/bottom-sheet/CatalogBottomSheet'
+
+function getDialogueSituation(home) {
+  const routines = home?.routines ?? []
+
+  const completedCount = home?.progress?.completedCount ?? 0
+
+  const totalCount = home?.progress?.totalCount ?? 0
+
+  const currentStreakDays = home?.success?.currentStreakDays ?? 0
+
+  const isAllCompleted = totalCount > 0 && completedCount === totalCount
+
+  if (isAllCompleted) {
+    return 'ALL_COMPLETED'
+  }
+
+  if (routines.some((routine) => routine.status === 'AVAILABLE')) {
+    return 'ROUTINE_AVAILABLE'
+  }
+
+  if (routines.some((routine) => routine.status === 'UPCOMING')) {
+    return 'ROUTINE_UPCOMING'
+  }
+
+  if (routines.some((routine) => routine.status === 'FAILED')) {
+    return 'ROUTINE_REMINDER'
+  }
+
+  if (completedCount > 0) {
+    return 'ROUTINE_COMPLETED'
+  }
+
+  if (currentStreakDays > 0) {
+    return 'STREAK_CONTINUED'
+  }
+
+  return 'RETURN_AFTER_ABSENCE'
+}
+
+async function getSelectedAvatarDialogue() {
+  const home = await getHome()
+
+  const situation = getDialogueSituation(home)
+
+  return selectAvatarDialogue(situation)
+}
 
 function CustomizePage() {
   const [sheetProgress, setSheetProgress] = useState(0)
-  const [isChatVisible, setIsChatVisible] = useState(false)
-  const [chatContent, setChatContent] = useState('')
 
-  const chatTimerRef = useRef(null)
+  const [avatarImageUrl, setAvatarImageUrl] = useState('')
+
+  const [chatContent, setChatContent] = useState('오늘도 같이 해볼까요?')
+
+  const [isDialogueLoading, setIsDialogueLoading] = useState(false)
 
   const avatarHeight = 400 - sheetProgress * 100
+
   const avatarTranslateY = -sheetProgress * 30
 
-  // 백엔드 연결 전 임시 대사
-  const dummyMessages = [
-    '이 옷은 어때요?',
-    '새로운 아이템을 입어보고 싶어요!',
-    '오늘은 어떤 스타일로 꾸며줄 거예요?',
-    '이것도 잘 어울릴 것 같은데요?',
-    '멋지게 꾸며주세요!',
-  ]
+  useEffect(() => {
+    let objectUrl = ''
+    let isCancelled = false
 
-  const handleAvatarClick = () => {
-    const randomIndex = Math.floor(Math.random() * dummyMessages.length)
-    const message = dummyMessages[randomIndex]
+    const loadAvatarImage = async () => {
+      try {
+        const imageBlob = await getAvatarImage()
 
-    setChatContent(message)
-    setIsChatVisible(true)
+        if (isCancelled) return
 
-    if (chatTimerRef.current) {
-      clearTimeout(chatTimerRef.current)
+        objectUrl = URL.createObjectURL(imageBlob)
+
+        setAvatarImageUrl(objectUrl)
+      } catch (error) {
+        console.error('아바타 이미지를 불러오지 못했습니다.', error)
+      }
     }
 
-    chatTimerRef.current = setTimeout(() => {
-      setIsChatVisible(false)
-    }, 2000)
+    loadAvatarImage()
+
+    return () => {
+      isCancelled = true
+
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    let isCancelled = false
+
+    const loadAvatarDialogue = async () => {
+      setIsDialogueLoading(true)
+
+      try {
+        const dialogue = await getSelectedAvatarDialogue()
+
+        if (!isCancelled && dialogue?.content) {
+          setChatContent(dialogue.content)
+        }
+      } catch (error) {
+        console.error('아바타 대사를 불러오지 못했습니다.', error)
+      } finally {
+        if (!isCancelled) {
+          setIsDialogueLoading(false)
+        }
+      }
+    }
+
+    loadAvatarDialogue()
+
+    return () => {
+      isCancelled = true
+    }
+  }, [])
+
+  const handleAvatarClick = async () => {
+    if (isDialogueLoading) return
+
+    setIsDialogueLoading(true)
+
+    try {
+      const dialogue = await getSelectedAvatarDialogue()
+
+      if (dialogue?.content) {
+        setChatContent(dialogue.content)
+      }
+    } catch (error) {
+      console.error('아바타 대사를 불러오지 못했습니다.', error)
+    } finally {
+      setIsDialogueLoading(false)
+    }
   }
 
   return (
@@ -58,16 +164,19 @@ function CustomizePage() {
         }}
       >
         <img
-          src={dummy}
+          src={avatarImageUrl || dummy}
           className='custom__avatar'
+          alt='내 아바타'
+          aria-busy={isDialogueLoading}
           onClick={handleAvatarClick}
           style={{
             height: `${avatarHeight}px`,
+            cursor: isDialogueLoading ? 'wait' : 'pointer',
           }}
         />
-
-        {isChatVisible && <ChatBubble content={chatContent} />}
       </div>
+
+      <ChatBubble content={chatContent} />
 
       <CatalogBottomSheet onDragProgress={setSheetProgress} />
     </div>
