@@ -3,12 +3,40 @@ import { useNavigate } from 'react-router-dom'
 
 import './AvatarSettingPage.css'
 
+import { createAvatar } from '../../api/avatarApi'
+import {
+  activateSpeechStylePreset,
+  getSpeechStylePresets,
+  updateSpeechStyle,
+} from '../../api/speechStyleApi'
+import { getCurrentUser } from '../../api/userApi'
+
 import MainTitle from '../../components/initial-page-title/MainTitle'
 import SubTitle from '../../components/initial-page-title/SubTitle'
 import BackButton from '../../components/back-button/BackButton'
 import BottomButton from '../../components/bottom-button/BottomButton'
 
 import PopupPage from './popup-page/PopupPage'
+
+const GROWTH_TRACK_KEY = 'selected_growth_track'
+
+const SPEECH_STYLE_SETTINGS = {
+  kind: {
+    directness: 'LOW',
+    warmth: 'HIGH',
+    playfulness: 'LOW',
+  },
+  cranky: {
+    directness: 'HIGH',
+    warmth: 'LOW',
+    playfulness: 'LOW',
+  },
+  playful: {
+    directness: 'MEDIUM',
+    warmth: 'MEDIUM',
+    playfulness: 'HIGH',
+  },
+}
 
 function stopCameraStream(stream) {
   stream?.getTracks().forEach((track) => {
@@ -37,6 +65,7 @@ function AvatarSettingPage() {
 
   const [isPopupOpen, setIsPopupOpen] = useState(false)
   const [isCameraLoading, setIsCameraLoading] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [cameraStream, setCameraStream] = useState(null)
 
   const [capturedPhoto, setCapturedPhoto] = useState({
@@ -44,7 +73,10 @@ function AvatarSettingPage() {
     url: '',
   })
 
-  // 다시 촬영하거나 페이지를 나갈 때 이전 사진 URL 제거
+  const [speechLevel, setSpeechLevel] = useState('BANMAL')
+  const [sentenceLength, setSentenceLength] = useState('SHORT')
+  const [speechStyle, setSpeechStyle] = useState('kind')
+
   useEffect(() => {
     return () => {
       if (capturedPhoto.url) {
@@ -53,7 +85,6 @@ function AvatarSettingPage() {
     }
   }, [capturedPhoto.url])
 
-  // 페이지를 나가거나 카메라 스트림이 변경될 때 카메라 종료
   useEffect(() => {
     return () => {
       stopCameraStream(cameraStream)
@@ -65,7 +96,7 @@ function AvatarSettingPage() {
   }
 
   const handleOpenPopup = async () => {
-    if (isCameraLoading) return
+    if (isCameraLoading || isSubmitting) return
 
     if (!window.isSecureContext) {
       alert('카메라는 HTTPS 또는 localhost에서만 사용할 수 있어요.')
@@ -110,6 +141,10 @@ function AvatarSettingPage() {
   }
 
   const handlePhotoCapture = (photoFile) => {
+    if (capturedPhoto.url) {
+      URL.revokeObjectURL(capturedPhoto.url)
+    }
+
     const photoUrl = URL.createObjectURL(photoFile)
 
     setCapturedPhoto({
@@ -123,13 +158,62 @@ function AvatarSettingPage() {
     setIsPopupOpen(false)
   }
 
-  const handleNext = () => {
-    /*
-     * 실제 촬영된 파일은 capturedPhoto.file에 저장되어 있어.
-     * 추후 백엔드 연결 시 이 파일을 전송하면 돼.
-     */
+  const handleNext = async () => {
+    if (isSubmitting) return
 
-    navigate('/story')
+    setIsSubmitting(true)
+
+    try {
+      const user = await getCurrentUser()
+
+      if (!user.avatarConfigured) {
+        const growthTrack = sessionStorage.getItem(GROWTH_TRACK_KEY)
+
+        if (!growthTrack) {
+          alert('성장 트랙을 먼저 선택해 주세요.')
+          navigate('/tracksetting')
+          return
+        }
+
+        await createAvatar({
+          growthTrack,
+          facePhoto: capturedPhoto.file,
+        })
+      }
+
+      if (!user.speechStyleConfigured) {
+        const presets = await getSpeechStylePresets()
+
+        const selectedPreset = presets.find((preset) => preset.code === 'CALM') ?? presets[0]
+
+        if (!selectedPreset) {
+          throw new Error('사용 가능한 말투 프리셋이 없습니다.')
+        }
+
+        await activateSpeechStylePreset(selectedPreset.code)
+      }
+
+      const selectedStyleSettings = SPEECH_STYLE_SETTINGS[speechStyle]
+
+      await updateSpeechStyle({
+        speechLevel,
+        sentenceLength,
+        directness: selectedStyleSettings.directness,
+        warmth: selectedStyleSettings.warmth,
+        playfulness: selectedStyleSettings.playfulness,
+        profanityEnabled: false,
+      })
+
+      sessionStorage.removeItem(GROWTH_TRACK_KEY)
+
+      navigate('/story')
+    } catch (error) {
+      console.error(error)
+
+      alert(error.message ?? '아바타 설정을 완료하지 못했습니다.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -156,7 +240,7 @@ function AvatarSettingPage() {
             <button
               className='avatar-setting-page__generator'
               type='button'
-              disabled={isCameraLoading}
+              disabled={isCameraLoading || isSubmitting}
               aria-busy={isCameraLoading}
               aria-label={capturedPhoto.url ? '사진 다시 촬영하기' : '아바타 생성용 사진 촬영하기'}
               onClick={handleOpenPopup}
@@ -180,46 +264,110 @@ function AvatarSettingPage() {
 
             <div className='avatar-setting-page__speech-options'>
               <label className='avatar-setting-page__speech-option'>
-                <input type='radio' name='speech-level' value='casual' defaultChecked />
+                <input
+                  type='radio'
+                  name='speech-level'
+                  value='BANMAL'
+                  checked={speechLevel === 'BANMAL'}
+                  disabled={isSubmitting}
+                  onChange={(event) => setSpeechLevel(event.target.value)}
+                />
+
                 <span>반말</span>
               </label>
 
               <label className='avatar-setting-page__speech-option'>
-                <input type='radio' name='speech-level' value='polite' />
+                <input
+                  type='radio'
+                  name='speech-level'
+                  value='JONDAEMAL'
+                  checked={speechLevel === 'JONDAEMAL'}
+                  disabled={isSubmitting}
+                  onChange={(event) => setSpeechLevel(event.target.value)}
+                />
+
                 <span>존댓말</span>
               </label>
             </div>
 
             <div className='avatar-setting-page__length-options'>
               <label className='avatar-setting-page__length-option'>
-                <input type='radio' name='response-length' value='short' defaultChecked />
+                <input
+                  type='radio'
+                  name='response-length'
+                  value='SHORT'
+                  checked={sentenceLength === 'SHORT'}
+                  disabled={isSubmitting}
+                  onChange={(event) => setSentenceLength(event.target.value)}
+                />
+
                 <span>짧은 응답</span>
               </label>
 
               <label className='avatar-setting-page__length-option'>
-                <input type='radio' name='response-length' value='normal' />
+                <input
+                  type='radio'
+                  name='response-length'
+                  value='MEDIUM'
+                  checked={sentenceLength === 'MEDIUM'}
+                  disabled={isSubmitting}
+                  onChange={(event) => setSentenceLength(event.target.value)}
+                />
+
                 <span>보통 응답</span>
               </label>
 
               <label className='avatar-setting-page__length-option'>
-                <input type='radio' name='response-length' value='long' />
+                <input
+                  type='radio'
+                  name='response-length'
+                  value='LONG'
+                  checked={sentenceLength === 'LONG'}
+                  disabled={isSubmitting}
+                  onChange={(event) => setSentenceLength(event.target.value)}
+                />
+
                 <span>자세한 응답</span>
               </label>
             </div>
 
             <div className='avatar-setting-page__style-options'>
               <label className='avatar-setting-page__style-option'>
-                <input type='radio' name='speech-style' value='kind' defaultChecked />
+                <input
+                  type='radio'
+                  name='speech-style'
+                  value='kind'
+                  checked={speechStyle === 'kind'}
+                  disabled={isSubmitting}
+                  onChange={(event) => setSpeechStyle(event.target.value)}
+                />
+
                 <span>다정함</span>
               </label>
 
               <label className='avatar-setting-page__style-option'>
-                <input type='radio' name='speech-style' value='cranky' />
+                <input
+                  type='radio'
+                  name='speech-style'
+                  value='cranky'
+                  checked={speechStyle === 'cranky'}
+                  disabled={isSubmitting}
+                  onChange={(event) => setSpeechStyle(event.target.value)}
+                />
+
                 <span>까칠함</span>
               </label>
 
               <label className='avatar-setting-page__style-option'>
-                <input type='radio' name='speech-style' value='playful' />
+                <input
+                  type='radio'
+                  name='speech-style'
+                  value='playful'
+                  checked={speechStyle === 'playful'}
+                  disabled={isSubmitting}
+                  onChange={(event) => setSpeechStyle(event.target.value)}
+                />
+
                 <span>장난스러움</span>
               </label>
             </div>
@@ -235,7 +383,9 @@ function AvatarSettingPage() {
           <span />
         </div>
 
-        <BottomButton onClick={handleNext}>다음</BottomButton>
+        <BottomButton onClick={handleNext} disabled={isSubmitting}>
+          {isSubmitting ? '아바타 설정 중...' : '다음'}
+        </BottomButton>
       </footer>
 
       {isPopupOpen && cameraStream && (
