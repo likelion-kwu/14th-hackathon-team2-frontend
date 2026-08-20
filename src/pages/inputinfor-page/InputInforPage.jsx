@@ -1,6 +1,9 @@
 import './InputInforPage.css'
+
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+
+import { updateNickname } from '../../api/userApi'
 
 import MainTitle from '../../components/initial-page-title/MainTitle'
 import SubTitle from '../../components/initial-page-title/SubTitle'
@@ -16,17 +19,30 @@ function InputInforPage() {
   const [name, setName] = useState('')
   const [nickname, setNickname] = useState('')
   const [gender, setGender] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const isFormValid = name.trim() !== '' && nickname.trim() !== '' && gender !== ''
+  const isFormValid = name.trim() !== '' && nickname.trim() !== '' && gender !== '' && !isSubmitting
 
   const handleBack = () => {
     navigate(-1)
   }
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!isFormValid) return
 
-    navigate('/tracksetting')
+    setIsSubmitting(true)
+
+    try {
+      await updateNickname(nickname.trim())
+
+      navigate('/tracksetting')
+    } catch (error) {
+      console.error(error)
+
+      alert(error.message ?? '닉네임을 저장하지 못했습니다.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -77,6 +93,7 @@ function InputInforPage() {
                 checked={gender === 'male'}
                 onChange={(event) => setGender(event.target.value)}
               />
+
               <span>남성</span>
             </label>
 
@@ -88,6 +105,7 @@ function InputInforPage() {
                 checked={gender === 'female'}
                 onChange={(event) => setGender(event.target.value)}
               />
+
               <span>여성</span>
             </label>
           </div>
@@ -97,7 +115,7 @@ function InputInforPage() {
       <img className='input-infor-page__bottom-bar' src={bottomBarImage} alt='' />
 
       <BottomButton onClick={handleNext} disabled={!isFormValid}>
-        다음
+        {isSubmitting ? '저장 중...' : '다음'}
       </BottomButton>
     </div>
   )
