@@ -1,4 +1,5 @@
 import './TrackSettingPage.css'
+
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
@@ -18,27 +19,29 @@ import wellbeingDefaultImage from '../../assets/icons/icons-track/image-wellbein
 
 import bottomBarImage from '../../assets/tracksetting-page/image-bottombar3.svg'
 
+const GROWTH_TRACK_KEY = 'selected_growth_track'
+
 const TRACK_LIST = [
   {
-    id: 'skin',
+    id: 'SKIN',
     label: 'Skin',
     defaultImage: skinDefaultImage,
     activeImage: skinActiveImage,
   },
   {
-    id: 'wellbeing',
+    id: 'WELL_BEING',
     label: 'Well-being',
     defaultImage: wellbeingDefaultImage,
     activeImage: wellbeingActiveImage,
   },
   {
-    id: 'health',
+    id: 'HEALTH_FIT',
     label: 'Health & Fit',
     defaultImage: healthDefaultImage,
     activeImage: healthActiveImage,
   },
   {
-    id: 'diet',
+    id: 'DIET',
     label: 'Diet',
     defaultImage: dietDefaultImage,
     activeImage: dietActiveImage,
@@ -48,24 +51,22 @@ const TRACK_LIST = [
 function TrackSettingPage() {
   const navigate = useNavigate()
 
-  const [selectedTracks, setSelectedTracks] = useState([])
+  const [selectedTrack, setSelectedTrack] = useState(
+    () => sessionStorage.getItem(GROWTH_TRACK_KEY) ?? '',
+  )
 
   const handleBack = () => {
     navigate(-1)
   }
 
-  const handleTrackChange = (trackId, isChecked) => {
-    setSelectedTracks((previousTracks) => {
-      if (isChecked) {
-        return [...previousTracks, trackId]
-      }
-
-      return previousTracks.filter((id) => id !== trackId)
-    })
+  const handleTrackChange = (trackId) => {
+    setSelectedTrack(trackId)
   }
 
   const handleNext = () => {
-    if (selectedTracks.length === 0) return
+    if (!selectedTrack) return
+
+    sessionStorage.setItem(GROWTH_TRACK_KEY, selectedTrack)
 
     navigate('/avatarsetting')
   }
@@ -83,22 +84,22 @@ function TrackSettingPage() {
           싶으신가요?
         </MainTitle>
 
-        <SubTitle>트랙을 하나 이상 선택해 주세요.</SubTitle>
+        <SubTitle>트랙을 하나 선택해 주세요.</SubTitle>
       </div>
 
       <div className='track-setting-page__track-list'>
         {TRACK_LIST.map((track) => {
-          const isSelected = selectedTracks.includes(track.id)
+          const isSelected = selectedTrack === track.id
 
           return (
             <label key={track.id} className='track-setting-page__track-option'>
               <input
                 className='track-setting-page__track-checkbox'
-                type='checkbox'
-                name='track'
+                type='radio'
+                name='growth-track'
                 value={track.id}
                 checked={isSelected}
-                onChange={(event) => handleTrackChange(track.id, event.target.checked)}
+                onChange={() => handleTrackChange(track.id)}
               />
 
               <span className='track-setting-page__track-visual'>
@@ -121,7 +122,7 @@ function TrackSettingPage() {
 
       <img className='track-setting-page__bottom-bar' src={bottomBarImage} alt='' />
 
-      <BottomButton onClick={handleNext} disabled={selectedTracks.length === 0}>
+      <BottomButton onClick={handleNext} disabled={!selectedTrack}>
         다음
       </BottomButton>
     </div>
