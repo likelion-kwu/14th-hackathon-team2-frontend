@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import toast from 'react-hot-toast'
 
 import { getAvatarImage } from '../../../api/avatarApi'
 import {
@@ -15,6 +16,8 @@ import { Icon } from '../../../components/icon/Icon'
 import dummyProflie from '../../../assets/avatar/avatar-default/dummy-profile.png'
 
 import './SettingPage.css'
+
+const SPEECH_STYLE_TOAST_ID = 'speech-style-save'
 
 const DEFAULT_SELECTED = {
   speech: '반말',
@@ -254,7 +257,7 @@ function SettingPage() {
     }
   }, [])
 
-  const savePendingSettings = async () => {
+  async function savePendingSettings() {
     if (isSavingRef.current || !pendingSettingsRef.current) {
       return
     }
@@ -265,24 +268,40 @@ function SettingPage() {
     isSavingRef.current = true
     setIsSaving(true)
 
+    toast.loading('말투 변경 중...', {
+      id: SPEECH_STYLE_TOAST_ID,
+    })
+
+    let saveError = null
+
     try {
       await updateSpeechStyle(createUpdatePayload(settingsToSave))
     } catch (error) {
       console.error('말투 설정을 저장하지 못했습니다.', error)
 
-      alert(error.message ?? '말투 설정을 저장하지 못했습니다.')
+      saveError = error.message ?? '말투 변경에 실패했습니다.'
     } finally {
       isSavingRef.current = false
 
       if (pendingSettingsRef.current) {
-        if (saveTimerRef.current === null) {
-          saveTimerRef.current = window.setTimeout(() => {
-            saveTimerRef.current = null
-            savePendingSettings()
-          }, 0)
-        }
+        window.clearTimeout(saveTimerRef.current)
+
+        saveTimerRef.current = window.setTimeout(() => {
+          saveTimerRef.current = null
+          savePendingSettings()
+        }, 300)
       } else {
         setIsSaving(false)
+
+        if (saveError) {
+          toast.error(saveError, {
+            id: SPEECH_STYLE_TOAST_ID,
+          })
+        } else {
+          toast.success('변경 완료!', {
+            id: SPEECH_STYLE_TOAST_ID,
+          })
+        }
       }
     }
   }
@@ -557,7 +576,7 @@ function SettingPage() {
           disabled={isLoading || isSaving || isKakaoProcessing}
           onClick={handleKakaoButtonClick}
         >
-          {isKakaoProcessing ? kakaoStatusText : '카카오톡으로 설정하기'}
+          {isKakaoProcessing ? kakaoStatusText : '카카오톡(ZIP)으로 설정하기'}
         </button>
       </div>
     </div>
