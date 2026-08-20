@@ -68,7 +68,11 @@ function TrackSettingPage() {
 
     sessionStorage.setItem(GROWTH_TRACK_KEY, selectedTrack)
 
-    navigate('/avatarsetting')
+    navigate('/avatarsetting', {
+      state: {
+        growthTrack: selectedTrack,
+      },
+    })
   }
 
   return (
