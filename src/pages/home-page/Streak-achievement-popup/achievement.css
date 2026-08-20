@@ -347,3 +347,61 @@
     bottom: 17px;
   }
 }
+.achievement__calendar {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  justify-content: stretch;
+}
+
+.achievement__day {
+  position: relative;
+  gap: 13px;
+}
+
+.achievement__day-connector {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: 0;
+  width: 100%;
+  height: 34px;
+  background-color: #d9f5dc;
+}
+
+.achievement__day-circle {
+  position: relative;
+  z-index: 1;
+}
+
+.achievement__day-circle--completed {
+  background-color: #d9f5dc;
+}
+
+.achievement__day-circle--latest {
+  background-color: #62ca66;
+}
+
+.achievement__status {
+  position: absolute;
+  top: 55%;
+  left: 50%;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 13px;
+  transform: translateX(-50%);
+}
+
+.achievement__retry {
+  height: 34px;
+  margin-top: 10px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 999px;
+  background-color: #ffffff;
+  color: #555555;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
