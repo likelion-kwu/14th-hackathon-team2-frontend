@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import Episode from '../../episode-popup/Episode'
 
@@ -10,6 +10,7 @@ import RoutineTimeline from './routine-timeline/RoutineTimeline'
 import TodoSection from './todo-section/TodoSection'
 
 import { TIMELINE_IMAGES } from './homeBottomSheetData'
+import { createRoutineTimelineLayout } from './routineTimelineLayout'
 
 import './HomeBottomSheet.css'
 
@@ -24,9 +25,13 @@ function HomeBottomSheet({
   isRoutinePlusOpen = false,
 }) {
   const [sheetState, setSheetState] = useState('closed')
+
   const [dragY, setDragY] = useState(null)
+
   const [pointToast, setPointToast] = useState(null)
+
   const [isEpisodeOpen, setIsEpisodeOpen] = useState(false)
+
   const [isAchievementOpen, setIsAchievementOpen] = useState(false)
 
   const startYRef = useRef(0)
@@ -42,6 +47,10 @@ function HomeBottomSheet({
     closed: screenHeight * 0.65,
   }
 
+  const timelineLayout = useMemo(() => {
+    return createRoutineTimelineLayout(routines)
+  }, [routines])
+
   useEffect(() => {
     return () => {
       window.clearTimeout(pointToastTimerRef.current)
@@ -49,7 +58,9 @@ function HomeBottomSheet({
   }, [])
 
   const getCurrentTranslate = () => {
-    if (dragY !== null) return dragY
+    if (dragY !== null) {
+      return dragY
+    }
 
     return SNAP[sheetState]
   }
@@ -67,7 +78,9 @@ function HomeBottomSheet({
   }
 
   const handlePointerMove = (event) => {
-    if (!draggingRef.current) return
+    if (!draggingRef.current) {
+      return
+    }
 
     const diff = event.clientY - startYRef.current
 
@@ -78,7 +91,9 @@ function HomeBottomSheet({
   }
 
   const handlePointerUp = () => {
-    if (!draggingRef.current) return
+    if (!draggingRef.current) {
+      return
+    }
 
     draggingRef.current = false
 
@@ -111,6 +126,7 @@ function HomeBottomSheet({
   }
 
   const currentTranslate = getCurrentTranslate()
+
   const recommendationProgress = getProgress(currentTranslate)
 
   const completedTodoCount = todos.filter((todo) => todo.isCompleted).length
@@ -148,11 +164,28 @@ function HomeBottomSheet({
 
       <div className='bottomSheet__content'>
         <section className='bottomSheet__routine-section'>
-          <RoutineTimeline sunImage={TIMELINE_IMAGES.sun} moonImage={TIMELINE_IMAGES.moon} />
+          <RoutineTimeline
+            sunImage={TIMELINE_IMAGES.sun}
+            moonImage={TIMELINE_IMAGES.moon}
+            layout={timelineLayout}
+          />
 
-          <div className='routineList'>
-            {routines.map((routine) => (
-              <RoutineCard key={routine.id} routine={routine} onReceivePoint={handleReceivePoint} />
+          <div
+            className='routineList'
+            style={{
+              height: `${timelineLayout.height}px`,
+            }}
+          >
+            {timelineLayout.positionedRoutines.map(({ routine, top }) => (
+              <div
+                key={routine.id}
+                className='routineList__item'
+                style={{
+                  top: `${top}px`,
+                }}
+              >
+                <RoutineCard routine={routine} onReceivePoint={handleReceivePoint} />
+              </div>
             ))}
           </div>
         </section>

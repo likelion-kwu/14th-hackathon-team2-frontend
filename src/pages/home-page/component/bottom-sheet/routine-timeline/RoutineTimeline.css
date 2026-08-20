@@ -1,19 +1,37 @@
 .routineTimeline {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  position: relative;
   flex-shrink: 0;
   width: 44px;
-  height: 500px;
 }
 
-.routineTimeline__start,
-.routineTimeline__end {
+.routineTimeline__track {
+  position: absolute;
+  left: 50%;
+  width: 7px;
+  min-height: 0;
+  background-position: center top;
+  background-repeat: repeat-y;
+  background-size: 7px 14px;
+  transform: translateX(-50%);
+}
+
+.routineTimeline__track--past {
+  background-image: radial-gradient(circle, #72c96b 0 3px, transparent 3.5px);
+}
+
+.routineTimeline__track--future {
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.1) 0 3px, transparent 3.5px);
+}
+
+.routineTimeline__marker {
+  position: absolute;
+  left: 50%;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
-  flex-shrink: 0;
   gap: 2px;
+  transform: translate(-50%, -50%);
 }
 
 .routineTimeline__sun,
@@ -25,7 +43,12 @@
 }
 
 .routineTimeline__time {
-  flex-shrink: 0;
+  position: relative;
+  z-index: 3;
+  padding: 2px 0;
+  border-radius: 4px;
+  background-color: var(--color-white);
+  box-shadow: 0 0 0 6px var(--color-white);
   color: rgba(0, 0, 0, 0.3);
   font-size: 13px;
   font-weight: 400;
@@ -33,45 +56,13 @@
   white-space: nowrap;
 }
 
-.routineTimeline__dots {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-evenly;
-  width: 100%;
-  min-height: 0;
-}
-
-.routineTimeline__dots--3 {
-  flex: 3;
-}
-
-.routineTimeline__dots--4 {
-  flex: 4;
-}
-
-.routineTimeline__dots--5 {
-  flex: 5;
-}
-
-.routineTimeline__dot {
-  display: block;
-  flex-shrink: 0;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background-color: rgba(0, 0, 0, 0.1);
-}
-
-.routineTimeline__dot--active {
-  background-color: #62cb68;
-}
-
 .routineTimeline__now {
+  position: absolute;
+  left: 50%;
+  z-index: 3;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
   height: 28px;
   padding: 0 10px;
   box-sizing: border-box;
@@ -82,4 +73,5 @@
   font-weight: 500;
   line-height: 100%;
   white-space: nowrap;
+  transform: translate(-50%, -50%);
 }
