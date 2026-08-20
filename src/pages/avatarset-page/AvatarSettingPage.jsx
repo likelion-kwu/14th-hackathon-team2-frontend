@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 import { createAvatar } from '../../api/avatarApi'
-import { getSpeechStyle, updateSpeechStyle } from '../../api/speechStyleApi'
+import {
+  createSpeechStylePreset,
+  getSpeechStyle,
+  updateSpeechStyle,
+} from '../../api/speechStyleApi'
 
 import MainTitle from '../../components/initial-page-title/MainTitle'
 import SubTitle from '../../components/initial-page-title/SubTitle'
@@ -12,6 +16,26 @@ import BottomButton from '../../components/bottom-button/BottomButton'
 import PopupPage from './popup-page/PopupPage'
 
 import './AvatarSettingPage.css'
+
+const GROWTH_TRACK_KEY = 'selected_growth_track'
+
+const STYLE_SETTINGS = {
+  kind: {
+    directness: 'MEDIUM',
+    warmth: 'HIGH',
+    playfulness: 'LOW',
+  },
+  cranky: {
+    directness: 'HIGH',
+    warmth: 'LOW',
+    playfulness: 'LOW',
+  },
+  playful: {
+    directness: 'MEDIUM',
+    warmth: 'MEDIUM',
+    playfulness: 'HIGH',
+  },
+}
 
 function stopCameraStream(stream) {
   stream?.getTracks().forEach((track) => {
@@ -44,7 +68,11 @@ function AvatarSettingPage() {
   const isCustomizeMode =
     location.state?.fromCustomize === true || searchParams.get('from') === 'customize'
 
-  const growthTrack = location.state?.growthTrack
+  /*
+   * location.state는 새로고침하면 사라질 수 있으므로
+   * sessionStorage 값도 fallback으로 사용
+   */
+  const growthTrack = location.state?.growthTrack ?? sessionStorage.getItem(GROWTH_TRACK_KEY) ?? ''
 
   const [isPopupOpen, setIsPopupOpen] = useState(false)
   const [isCameraLoading, setIsCameraLoading] = useState(false)
@@ -133,13 +161,11 @@ function AvatarSettingPage() {
 
     if (!window.isSecureContext) {
       alert('카메라는 HTTPS 또는 localhost에서만 사용할 수 있어요.')
-
       return
     }
 
     if (!navigator.mediaDevices?.getUserMedia) {
       alert('현재 브라우저에서는 카메라 기능을 지원하지 않아요.')
-
       return
     }
 
@@ -189,38 +215,28 @@ function AvatarSettingPage() {
     setIsPopupOpen(false)
   }
 
+  const saveSpeechStyle = async () => {
+    await updateSpeechStyle({
+      speechLevel,
+      sentenceLength,
+      ...STYLE_SETTINGS[speechStyle],
+    })
+  }
+
   const handleNext = async () => {
+    /*
+     * 커스터마이징에서 들어온 경우
+     * 기존 말투 설정만 수정
+     */
     if (isCustomizeMode) {
       if (isSpeechLoading || isSpeechSaving || isAvatarSaving) {
         return
       }
 
-      const styleSettings = {
-        kind: {
-          directness: 'MEDIUM',
-          warmth: 'HIGH',
-          playfulness: 'LOW',
-        },
-        cranky: {
-          directness: 'HIGH',
-          warmth: 'LOW',
-          playfulness: 'LOW',
-        },
-        playful: {
-          directness: 'MEDIUM',
-          warmth: 'MEDIUM',
-          playfulness: 'HIGH',
-        },
-      }
-
       setIsSpeechSaving(true)
 
       try {
-        await updateSpeechStyle({
-          speechLevel,
-          sentenceLength,
-          ...styleSettings[speechStyle],
-        })
+        await saveSpeechStyle()
 
         navigate('/customize')
       } catch (error) {
@@ -234,29 +250,64 @@ function AvatarSettingPage() {
       return
     }
 
+    /*
+     * 최초 온보딩
+     */
     if (!growthTrack) {
       alert('성장 트랙을 다시 선택해 주세요.')
       navigate('/tracksetting')
       return
     }
 
-    if (isAvatarSaving) return
+    if (isAvatarSaving || isSpeechSaving) return
 
     setIsAvatarSaving(true)
 
     try {
-      await createAvatar({
+      /*
+       * 1. 아바타 생성
+       */
+      const avatarResponse = await createAvatar({
         growthTrack,
         facePhoto: capturedPhoto.file,
       })
 
+      console.log('아바타 생성 완료:', avatarResponse)
+
+      /*
+       * 아바타 생성 이후 백엔드 nextStep은
+       * SPEECH_STYLE_SETUP 상태.
+       *
+       * 먼저 기본 preset을 활성화해서
+       * speech style profile을 생성한다.
+       */
+      const presetResponse = await createSpeechStylePreset('CALM')
+
+      console.log('기본 말투 생성 완료:', presetResponse)
+
+      /*
+       * 2. 사용자가 화면에서 선택한 값으로
+       * 생성된 말투를 수정
+       */
+      await saveSpeechStyle()
+
+      console.log('말투 설정 완료')
+
+      /*
+       * 온보딩 완료 후에는 더 이상 필요하지 않음
+       */
+      sessionStorage.removeItem(GROWTH_TRACK_KEY)
+
+      /*
+       * 3. 인트로 이동
+       */
       navigate('/intro', {
         replace: true,
       })
     } catch (error) {
-      console.error('아바타를 생성하지 못했습니다.', error)
+      console.error('온보딩 설정을 완료하지 못했습니다.', error)
 
-      alert(error.message ?? '아바타를 생성하지 못했습니다.')
+      alert(error.message ?? '온보딩 설정을 완료하지 못했습니다.')
     } finally {
       setIsAvatarSaving(false)
     }
@@ -432,13 +483,31 @@ function AvatarSettingPage() {
         </div>
 
         <BottomButton onClick={handleNext} disabled={isPageBusy}>
-          {isCustomizeMode
-            ? isSpeechSaving
-              ? '저장 중...'
-              : '설정 저장하기'
-            : isAvatarSaving
-              ? '아바타 생성 중...'
-              : '다음'}
+          {isCustomizeMode ? (
+            isSpeechSaving ? (
+              <span className='avatar-setting-page__loading'>
+                저장 중
+                <span className='avatar-setting-page__loading-dots' aria-hidden='true'>
+                  <span />
+                  <span />
+                  <span />
+                </span>
+              </span>
+            ) : (
+              '설정 저장하기'
+            )
+          ) : isAvatarSaving ? (
+            <span className='avatar-setting-page__loading'>
+              아바타 생성 중
+              <span className='avatar-setting-page__loading-dots' aria-hidden='true'>
+                <span />
+                <span />
+                <span />
+              </span>
+            </span>
+          ) : (
+            '다음'
+          )}
         </BottomButton>
       </footer>
 
