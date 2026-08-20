@@ -1,20 +1,128 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
+
+import { getRecords } from '../../../api/recordApi'
 
 import './achievement.css'
 
-const DEFAULT_DAYS = ['수', '목', '금', '토', '일', '월', '화']
+const KOREAN_WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토']
 
-function Achievement({ data, streak, completedDays, days, onOpenChange }) {
+function formatDate(date) {
+  const year = date.getUTCFullYear()
+
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0')
+
+  const day = String(date.getUTCDate()).padStart(2, '0')
+
+  return `${year}-${month}-${day}`
+}
+
+function createRecentSevenDays() {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Seoul',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(new Date())
+
+  const year = Number(parts.find((part) => part.type === 'year')?.value)
+
+  const month = Number(parts.find((part) => part.type === 'month')?.value)
+
+  const day = Number(parts.find((part) => part.type === 'day')?.value)
+
+  const today = new Date(Date.UTC(year, month - 1, day))
+
+  return Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(today)
+
+    date.setUTCDate(today.getUTCDate() - 6 + index)
+
+    return {
+      serviceDate: formatDate(date),
+      label: KOREAN_WEEKDAYS[date.getUTCDay()],
+    }
+  })
+}
+
+function Achievement({ data, onOpenChange }) {
   const [isOpen, setIsOpen] = useState(false)
 
-  const resolvedStreak = streak ?? data?.streak ?? 2
-  const resolvedDays = days ?? data?.days ?? DEFAULT_DAYS
+  const [recordData, setRecordData] = useState(null)
 
-  const resolvedCompletedDays = Math.min(
-    resolvedDays.length,
-    Math.max(0, completedDays ?? data?.completedDays ?? 2),
-  )
+  const [isLoading, setIsLoading] = useState(false)
+
+  const [errorMessage, setErrorMessage] = useState('')
+
+  const [reloadKey, setReloadKey] = useState(0)
+
+  const recentDays = useMemo(() => {
+    return createRecentSevenDays()
+  }, [isOpen, reloadKey])
+
+  const fromDate = recentDays[0].serviceDate
+
+  const toDate = recentDays[recentDays.length - 1].serviceDate
+
+  useEffect(() => {
+    if (!isOpen) return undefined
+
+    let isActive = true
+
+    const loadRecords = async () => {
+      setIsLoading(true)
+      setErrorMessage('')
+
+      try {
+        const response = await getRecords({
+          fromDate,
+          toDate,
+        })
+
+        if (!isActive) return
+
+        setRecordData(response)
+      } catch (error) {
+        if (!isActive) return
+
+        console.error('달성 기록을 불러오지 못했습니다.', error)
+
+        setErrorMessage(error.message ?? '달성 기록을 불러오지 못했습니다.')
+      } finally {
+        if (isActive) {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    loadRecords()
+
+    return () => {
+      isActive = false
+    }
+  }, [isOpen, fromDate, toDate, reloadKey])
+
+  const calendarDays = useMemo(() => {
+    const recordMap = new Map(
+      (recordData?.days ?? []).map((record) => [record.serviceDate, record]),
+    )
+
+    return recentDays.map((day) => {
+      const record = recordMap.get(day.serviceDate)
+
+      return {
+        ...day,
+        record,
+        isCompleted: record?.dayStatus === 'SUCCESS',
+      }
+    })
+  }, [recentDays, recordData])
+
+  const latestCompletedIndex = calendarDays.reduce((latestIndex, day, index) => {
+    return day.isCompleted ? index : latestIndex
+  }, -1)
+
+  const resolvedStreak = recordData?.summary?.currentStreakDays ?? data?.streak ?? 0
 
   const openAchievement = (event) => {
     event.stopPropagation()
@@ -30,29 +138,36 @@ function Achievement({ data, streak, completedDays, days, onOpenChange }) {
     onOpenChange?.(false)
   }
 
+  const handleRetry = (event) => {
+    event.stopPropagation()
+
+    setReloadKey((previous) => previous + 1)
+  }
+
   useEffect(() => {
     if (!isOpen) return undefined
 
     const previousOverflow = document.body.style.overflow
 
     const handleKeyDown = (event) => {
-      if (event.key !== 'Escape') return
+      if (event.key !== 'Escape') {
+        return
+      }
 
       setIsOpen(false)
       onOpenChange?.(false)
     }
 
     document.body.style.overflow = 'hidden'
+
     window.addEventListener('keydown', handleKeyDown)
 
     return () => {
       document.body.style.overflow = previousOverflow
+
       window.removeEventListener('keydown', handleKeyDown)
     }
   }, [isOpen, onOpenChange])
-
-  const progressWidth =
-    resolvedCompletedDays > 0 ? resolvedCompletedDays * 34 + (resolvedCompletedDays - 1) * 7 : 0
 
   return (
     <>
@@ -116,21 +231,27 @@ function Achievement({ data, streak, completedDays, days, onOpenChange }) {
                 <span>{resolvedStreak}</span>
               </div>
 
-              <div className='achievement__calendar'>
-                {resolvedCompletedDays > 0 && (
-                  <div
-                    className='achievement__progress-background'
-                    style={{ width: `${progressWidth}px` }}
-                  />
-                )}
+              {isLoading && <div className='achievement__status'>기록을 불러오고 있어요</div>}
 
-                {resolvedDays.map((day, index) => {
-                  const isCompleted = index < resolvedCompletedDays
-                  const isLatest = index === resolvedCompletedDays - 1
+              {!isLoading && errorMessage && (
+                <div className='achievement__status'>
+                  <span>기록을 불러오지 못했어요</span>
+
+                  <button type='button' className='achievement__retry' onClick={handleRetry}>
+                    다시 불러오기
+                  </button>
+                </div>
+              )}
+
+              <div className='achievement__calendar'>
+                {calendarDays.map((day, index) => {
+                  const isLatest = index === latestCompletedIndex
+
+                  const isConnected = day.isCompleted && calendarDays[index + 1]?.isCompleted
 
                   const circleClassName = [
                     'achievement__day-circle',
-                    isCompleted ? 'achievement__day-circle--completed' : '',
+                    day.isCompleted ? 'achievement__day-circle--completed' : '',
                     isLatest ? 'achievement__day-circle--latest' : '',
                   ]
                     .filter(Boolean)
@@ -144,9 +265,11 @@ function Achievement({ data, streak, completedDays, days, onOpenChange }) {
                     .join(' ')
 
                   return (
-                    <div className='achievement__day' key={`${day}-${index}`}>
+                    <div className='achievement__day' key={day.serviceDate}>
+                      {isConnected && <span className='achievement__day-connector' />}
+
                       <div className={circleClassName}>
-                        {isCompleted && (
+                        {day.isCompleted && (
                           <svg
                             width='18'
                             height='18'
@@ -165,14 +288,16 @@ function Achievement({ data, streak, completedDays, days, onOpenChange }) {
                         )}
                       </div>
 
-                      <span className={labelClassName}>{day}</span>
+                      <span className={labelClassName}>{day.label}</span>
                     </div>
                   )
                 })}
               </div>
 
               <button type='button' className='achievement__message' onClick={closeAchievement}>
-                {resolvedStreak}일 연속으로 루틴을 달성했어요!
+                {resolvedStreak > 0
+                  ? `${resolvedStreak}일 연속으로 루틴을 달성했어요!`
+                  : '오늘부터 연속 달성을 시작해 볼까요?'}
               </button>
             </section>
           </div>,
