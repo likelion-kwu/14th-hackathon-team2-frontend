@@ -1,14 +1,45 @@
 import './OnboardingPage.css'
+
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+
+import { ensureGuestSession } from '../../api/sessionApi'
+
 import BottomButton from '../../components/bottom-button/BottomButton'
+
 import onboardingCharacters from '../../assets/onboarding-page/image-character.svg'
 import onboardingBar from '../../assets/onboarding-page/image-bottombar.svg'
+
+const NEXT_STEP_ROUTE = {
+  NICKNAME_SETUP: '/inputinfor',
+  AVATAR_SETUP: '/tracksetting',
+  SPEECH_STYLE_SETUP: '/avatarsetting',
+  HOME: '/home',
+}
 
 function OnboardingPage() {
   const navigate = useNavigate()
 
-  const handleNext = () => {
-    navigate('/inputinfor')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const handleNext = async () => {
+    if (isSubmitting) return
+
+    setIsSubmitting(true)
+
+    try {
+      const session = await ensureGuestSession()
+
+      const nextRoute = NEXT_STEP_ROUTE[session.nextStep] ?? '/inputinfor'
+
+      navigate(nextRoute)
+    } catch (error) {
+      console.error(error)
+
+      alert(error.message ?? '사용자 정보를 생성하지 못했습니다.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -29,7 +60,9 @@ function OnboardingPage() {
 
       <img className='onboarding-page__bottom-bar' src={onboardingBar} alt='' />
 
-      <BottomButton children='Filaby 시작하기' onClick={handleNext} />
+      <BottomButton onClick={handleNext} disabled={isSubmitting}>
+        {isSubmitting ? '서버 연결 중...' : 'Filaby 시작하기'}
+      </BottomButton>
     </div>
   )
 }
