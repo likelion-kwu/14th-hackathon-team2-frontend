@@ -1,74 +1,57 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
-import './CustomizePage.css'
-
-import { getAvatarImage, selectAvatarDialogue } from '../../../api/avatarApi'
+import { getAvatarImage } from '../../../api/avatarApi'
 import { getHome } from '../../../api/homeApi'
+import { getItems, updateAvatarEquipment } from '../../../api/itemApi'
 
 import ChatBubble from '../../../components/chat-bubble/ChatBubble'
 
 import dummy from '../../../assets/avatar/avatar-default/dummy.png'
 
 import CatalogBottomSheet from '../component/bottom-sheet/CatalogBottomSheet'
+import { getItemAsset } from '../itemAssetMap'
 
-function getDialogueSituation(home) {
-  const routines = home?.routines ?? []
-
-  const completedCount = home?.progress?.completedCount ?? 0
-
-  const totalCount = home?.progress?.totalCount ?? 0
-
-  const currentStreakDays = home?.success?.currentStreakDays ?? 0
-
-  const isAllCompleted = totalCount > 0 && completedCount === totalCount
-
-  if (isAllCompleted) {
-    return 'ALL_COMPLETED'
-  }
-
-  if (routines.some((routine) => routine.status === 'AVAILABLE')) {
-    return 'ROUTINE_AVAILABLE'
-  }
-
-  if (routines.some((routine) => routine.status === 'UPCOMING')) {
-    return 'ROUTINE_UPCOMING'
-  }
-
-  if (routines.some((routine) => routine.status === 'FAILED')) {
-    return 'ROUTINE_REMINDER'
-  }
-
-  if (completedCount > 0) {
-    return 'ROUTINE_COMPLETED'
-  }
-
-  if (currentStreakDays > 0) {
-    return 'STREAK_CONTINUED'
-  }
-
-  return 'RETURN_AFTER_ABSENCE'
-}
-
-async function getSelectedAvatarDialogue() {
-  const home = await getHome()
-
-  const situation = getDialogueSituation(home)
-
-  return selectAvatarDialogue(situation)
-}
+import './CustomizePage.css'
 
 function CustomizePage() {
+  const navigate = useNavigate()
+
   const [sheetProgress, setSheetProgress] = useState(0)
-
   const [avatarImageUrl, setAvatarImageUrl] = useState('')
-
-  const [chatContent, setChatContent] = useState('오늘도 같이 해볼까요?')
-
-  const [isDialogueLoading, setIsDialogueLoading] = useState(false)
+  const [totalPoints, setTotalPoints] = useState(0)
+  const [items, setItems] = useState([])
+  const [equippedItemIds, setEquippedItemIds] = useState([])
+  const [isItemsLoading, setIsItemsLoading] = useState(false)
+  const [isEquipmentSaving, setIsEquipmentSaving] = useState(false)
+  const [itemError, setItemError] = useState('')
 
   const avatarHeight = 400 - sheetProgress * 100
-
   const avatarTranslateY = -sheetProgress * 30
+
+  const equippedItems = items.filter((item) => equippedItemIds.includes(item.id))
+
+  useEffect(() => {
+    let isCancelled = false
+
+    const loadPoints = async () => {
+      try {
+        const home = await getHome()
+
+        if (isCancelled) return
+
+        setTotalPoints(home?.points?.totalEarned ?? 0)
+      } catch (error) {
+        console.error('포인트 정보를 불러오지 못했습니다.', error)
+      }
+    }
+
+    loadPoints()
+
+    return () => {
+      isCancelled = true
+    }
+  }, [])
 
   useEffect(() => {
     let objectUrl = ''
@@ -102,47 +85,77 @@ function CustomizePage() {
   useEffect(() => {
     let isCancelled = false
 
-    const loadAvatarDialogue = async () => {
-      setIsDialogueLoading(true)
+    const loadItems = async () => {
+      setIsItemsLoading(true)
+      setItemError('')
 
       try {
-        const dialogue = await getSelectedAvatarDialogue()
+        const result = await getItems({
+          ownedOnly: false,
+        })
 
-        if (!isCancelled && dialogue?.content) {
-          setChatContent(dialogue.content)
-        }
+        if (isCancelled) return
+
+        const itemList = Array.isArray(result) ? result : []
+
+        setItems(itemList)
+
+        setEquippedItemIds(itemList.filter((item) => item.equipped).map((item) => item.id))
       } catch (error) {
-        console.error('아바타 대사를 불러오지 못했습니다.', error)
+        console.error('아이템 목록을 불러오지 못했습니다.', error)
+
+        if (!isCancelled) {
+          setItemError(error.message ?? '아이템 목록을 불러오지 못했습니다.')
+        }
       } finally {
         if (!isCancelled) {
-          setIsDialogueLoading(false)
+          setIsItemsLoading(false)
         }
       }
     }
 
-    loadAvatarDialogue()
+    loadItems()
 
     return () => {
       isCancelled = true
     }
   }, [])
 
-  const handleAvatarClick = async () => {
-    if (isDialogueLoading) return
+  const handleItemToggle = async (item) => {
+    if (!item.owned || isEquipmentSaving) return
 
-    setIsDialogueLoading(true)
+    const previousItemIds = equippedItemIds
+    const isEquipped = previousItemIds.includes(item.id)
+
+    const nextItemIds = isEquipped
+      ? previousItemIds.filter((itemId) => itemId !== item.id)
+      : [...previousItemIds, item.id]
+
+    setEquippedItemIds(nextItemIds)
+    setIsEquipmentSaving(true)
+    setItemError('')
 
     try {
-      const dialogue = await getSelectedAvatarDialogue()
+      const result = await updateAvatarEquipment(nextItemIds)
 
-      if (dialogue?.content) {
-        setChatContent(dialogue.content)
+      const savedItemIds = result?.equippedItems?.map((equippedItem) => equippedItem.itemId)
+
+      if (savedItemIds) {
+        setEquippedItemIds(savedItemIds)
       }
     } catch (error) {
-      console.error('아바타 대사를 불러오지 못했습니다.', error)
+      console.error('아이템 장착 상태를 저장하지 못했습니다.', error)
+
+      setEquippedItemIds(previousItemIds)
+
+      setItemError(error.message ?? '아이템 장착 상태를 저장하지 못했습니다.')
     } finally {
-      setIsDialogueLoading(false)
+      setIsEquipmentSaving(false)
     }
+  }
+
+  const handleAvatarSettingClick = () => {
+    navigate('/setting')
   }
 
   return (
@@ -163,22 +176,45 @@ function CustomizePage() {
           transform: `translateY(${avatarTranslateY}px)`,
         }}
       >
-        <img
-          src={avatarImageUrl || dummy}
-          className='custom__avatar'
-          alt='내 아바타'
-          aria-busy={isDialogueLoading}
-          onClick={handleAvatarClick}
+        <div
+          className='custom__avatar-stage'
           style={{
             height: `${avatarHeight}px`,
-            cursor: isDialogueLoading ? 'wait' : 'pointer',
           }}
-        />
+        >
+          <img src={avatarImageUrl || dummy} className='custom__avatar' alt='내 아바타' />
+
+          {equippedItems.map((item) => {
+            const itemImage = getItemAsset(item.assetKey)
+
+            if (!itemImage) return null
+
+            return (
+              <img
+                key={item.id}
+                src={itemImage}
+                alt=''
+                className='custom__avatar-item'
+                aria-hidden='true'
+              />
+            )
+          })}
+        </div>
       </div>
 
-      <ChatBubble content={chatContent} />
+      <ChatBubble content='어떤 아이템을 착용해 볼까요?' />
 
-      <CatalogBottomSheet onDragProgress={setSheetProgress} />
+      <CatalogBottomSheet
+        items={items}
+        equippedItemIds={equippedItemIds}
+        totalPoints={totalPoints}
+        isLoading={isItemsLoading}
+        isSaving={isEquipmentSaving}
+        errorMessage={itemError}
+        onItemToggle={handleItemToggle}
+        onAvatarSettingClick={handleAvatarSettingClick}
+        onDragProgress={setSheetProgress}
+      />
     </div>
   )
 }

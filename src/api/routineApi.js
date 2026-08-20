@@ -29,3 +29,8 @@ export function updateRoutine(routineId, routine) {
     body: routine,
   })
 }
+export function deleteRoutine(routineId) {
+  return apiRequest(`/routines/${routineId}`, {
+    method: 'DELETE',
+  })
+}

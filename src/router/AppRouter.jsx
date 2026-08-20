@@ -9,13 +9,14 @@ import InputInforPage from '../pages/inputinfor-page/InputInforPage'
 import OnboardingPage from '../pages/onboarding-page/OnboardingPage'
 import RankingPage from '../pages/ranking-page/entry/RankingPage'
 import ReflectionPage from '../pages/reflection-page/entry/ReflectionPage'
+import SettingPage from '../pages/setting-page/entry/SettingPage'
 import StoryPage from '../pages/story-page/StoryPage'
 import TrackSettingPage from '../pages/tracksetting-page/TrackSettingPage'
 import VerificationPage from '../pages/verification-page/VerificationPage'
 
 export const AppRouter = createBrowserRouter([
   {
-    path: '/',
+    path: '/onboarding',
     element: <OnboardingPage />,
   },
   {
@@ -61,6 +62,10 @@ export const AppRouter = createBrowserRouter([
       {
         path: 'customize',
         element: <CustomizePage />,
+      },
+      {
+        path: 'setting',
+        element: <SettingPage />,
       },
     ],
   },

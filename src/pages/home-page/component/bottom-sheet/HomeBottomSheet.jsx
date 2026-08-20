@@ -197,11 +197,7 @@ function HomeBottomSheet({
           </div>
         </section>
 
-        <TodoSection
-          todos={todos}
-          completedCount={completedTodoCount}
-          onReceivePoint={handleReceivePoint}
-        />
+        <TodoSection todos={todos} completedCount={completedTodoCount} onEdit={onRoutineEdit} />
       </div>
 
       {recommendedRoutines.length > 0 && (
