@@ -19,3 +19,11 @@ export function getAvatarImage() {
     responseType: 'blob',
   })
 }
+export function selectAvatarDialogue(situation) {
+  return apiRequest('/avatar-dialogues/selections', {
+    method: 'POST',
+    body: {
+      situation,
+    },
+  })
+}
