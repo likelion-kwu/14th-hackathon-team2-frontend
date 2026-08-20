@@ -161,3 +161,41 @@
   border-radius: 100px;
   font-size: 10px;
 }
+.rank__message {
+  position: absolute;
+  top: 0;
+  z-index: 2;
+  margin: 0;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 13px;
+}
+
+.rank__message--error {
+  color: #ff3333;
+}
+
+.rank__rankers--loading {
+  opacity: 0.35;
+}
+
+.rank__rankers {
+  justify-content: center;
+  width: 100%;
+  gap: clamp(10px, 5vw, 30px);
+}
+
+.rank__rankers__ranker {
+  min-width: 0;
+}
+
+.rank__rankers__ranker--nickname {
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rank__stage {
+  max-width: 100%;
+  height: auto;
+}
