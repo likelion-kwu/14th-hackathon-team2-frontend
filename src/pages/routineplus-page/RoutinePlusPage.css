@@ -455,3 +455,57 @@
   line-height: 1.4;
   text-align: center;
 }
+.routinePlus__daySetting {
+  padding: 11px 14px 13px;
+  border-bottom: 1px solid #ececec;
+}
+
+.routinePlus__dayHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 11px;
+}
+
+.routinePlus__everydayButton {
+  height: 28px;
+  padding: 0 13px;
+  border: none;
+  border-radius: 999px;
+  background-color: #e9e9e9;
+  color: #999999;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.routinePlus__everydayButton--selected {
+  background-color: var(--routine-accent);
+  color: #ffffff;
+}
+
+.routinePlus__dayButtons {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.routinePlus__dayButton {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background-color: #e9e9e9;
+  color: #999999;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.routinePlus__dayButton--selected {
+  background-color: var(--routine-accent);
+  color: #ffffff;
+}

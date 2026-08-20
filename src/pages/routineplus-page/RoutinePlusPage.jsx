@@ -65,17 +65,38 @@ const CATEGORY_LIST = [
   },
 ]
 
-const DAY_OPTIONS = {
-  weekday: ['MON', 'TUE', 'WED', 'THU', 'FRI'],
-  weekend: ['SAT', 'SUN'],
-  monday: ['MON'],
-  tuesday: ['TUE'],
-  wednesday: ['WED'],
-  thursday: ['THU'],
-  friday: ['FRI'],
-  saturday: ['SAT'],
-  sunday: ['SUN'],
-}
+const DAY_OPTIONS = [
+  {
+    code: 'MON',
+    label: '월',
+  },
+  {
+    code: 'TUE',
+    label: '화',
+  },
+  {
+    code: 'WED',
+    label: '수',
+  },
+  {
+    code: 'THU',
+    label: '목',
+  },
+  {
+    code: 'FRI',
+    label: '금',
+  },
+  {
+    code: 'SAT',
+    label: '토',
+  },
+  {
+    code: 'SUN',
+    label: '일',
+  },
+]
+
+const ALL_DAY_CODES = DAY_OPTIONS.map((day) => day.code)
 
 const VERIFICATION_OBJECT_LABELS = {
   CUP: '컵',
@@ -151,8 +172,12 @@ function normalizeVerificationObjects(response) {
     .filter(Boolean)
 }
 
-function getRepeatPayload(routineDay) {
-  if (routineDay === 'everyday') {
+function getRepeatPayload(selectedDays) {
+  const orderedDays = DAY_OPTIONS.map((day) => day.code).filter((code) =>
+    selectedDays.includes(code),
+  )
+
+  if (orderedDays.length === ALL_DAY_CODES.length) {
     return {
       repeatType: 'DAILY',
     }
@@ -160,7 +185,7 @@ function getRepeatPayload(routineDay) {
 
   return {
     repeatType: 'DAYS_OF_WEEK',
-    daysOfWeek: DAY_OPTIONS[routineDay],
+    daysOfWeek: orderedDays,
   }
 }
 
@@ -181,7 +206,7 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
     initialRoutine?.content ?? initialRoutine?.title ?? '',
   )
 
-  const [routineDay, setRoutineDay] = useState('')
+  const [selectedDays, setSelectedDays] = useState([])
   const [routineStartTime, setRoutineStartTime] = useState('')
   const [routineEndTime, setRoutineEndTime] = useState('')
 
@@ -256,20 +281,59 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
     setSubmitError('')
     setScreen('routine')
   }
+  const handleDayClick = (dayCode) => {
+    setSelectedDays((previousDays) => {
+      if (previousDays.includes(dayCode)) {
+        return previousDays.filter((code) => code !== dayCode)
+      }
 
+      return [...previousDays, dayCode]
+    })
+
+    setSubmitError('')
+  }
+
+  const handleEverydayClick = () => {
+    setSelectedDays((previousDays) => {
+      if (previousDays.length === ALL_DAY_CODES.length) {
+        return []
+      }
+
+      return [...ALL_DAY_CODES]
+    })
+
+    setSubmitError('')
+  }
   const handleRoutineSubmit = async (event) => {
     event.preventDefault()
+
+    const trimmedRoutineName = routineName.trim()
+
+    if (!trimmedRoutineName) {
+      setSubmitError('추가할 루틴을 입력해 주세요.')
+      return
+    }
+
+    if (selectedDays.length === 0) {
+      setSubmitError('루틴을 진행할 요일을 선택해 주세요.')
+      return
+    }
 
     if (!isValidTimeRange(routineStartTime, routineEndTime)) {
       setSubmitError('종료 시간은 시작 시간보다 늦어야 합니다.')
       return
     }
 
-    const repeatPayload = getRepeatPayload(routineDay)
+    if (!routineVerificationObject) {
+      setSubmitError('인증 물건을 선택해 주세요.')
+      return
+    }
+
+    const repeatPayload = getRepeatPayload(selectedDays)
 
     const newRoutine = {
       category: selectedCategory.code,
-      content: routineName.trim(),
+      content: trimmedRoutineName,
       startTime: routineStartTime,
       endTime: routineEndTime,
       ...repeatPayload,
@@ -282,18 +346,28 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
     try {
       const createdRoutine = await createRoutine(newRoutine)
 
-      setIsSubmitting(false)
       onCreated?.(createdRoutine)
       onClose()
+
+      if (createdRoutine?.appliedToCurrentServiceDate === false) {
+        const effectiveFrom = createdRoutine.effectiveFrom
+
+        window.setTimeout(() => {
+          window.alert(
+            effectiveFrom
+              ? `루틴이 추가되었습니다. 오늘의 루틴은 이미 시작되어 ${effectiveFrom}부터 적용됩니다.`
+              : '루틴이 추가되었습니다. 오늘의 루틴은 이미 시작되어 다음 반복일부터 적용됩니다.',
+          )
+        }, 0)
+      }
     } catch (error) {
       console.error('루틴을 추가하지 못했습니다.', error)
 
       setSubmitError(error.message ?? '루틴을 추가하지 못했습니다.')
-
+    } finally {
       setIsSubmitting(false)
     }
   }
-
   const handleTodoSubmit = async (event) => {
     event.preventDefault()
 
@@ -466,23 +540,44 @@ function RoutinePlusPage({ initialRoutine = null, onClose, onCreated }) {
               <h3 className='routinePlus__sectionTitle'>루틴 세부 설정</h3>
 
               <div className='routinePlus__settingList'>
-                <SettingSelect
-                  label='요일'
-                  value={routineDay}
-                  required
-                  onChange={(event) => setRoutineDay(event.target.value)}
-                >
-                  <option value='everyday'>매일</option>
-                  <option value='weekday'>평일</option>
-                  <option value='weekend'>주말</option>
-                  <option value='monday'>월요일</option>
-                  <option value='tuesday'>화요일</option>
-                  <option value='wednesday'>수요일</option>
-                  <option value='thursday'>목요일</option>
-                  <option value='friday'>금요일</option>
-                  <option value='saturday'>토요일</option>
-                  <option value='sunday'>일요일</option>
-                </SettingSelect>
+                <div className='routinePlus__daySetting'>
+                  <div className='routinePlus__dayHeader'>
+                    <span className='routinePlus__settingLabel'>요일</span>
+
+                    <button
+                      type='button'
+                      className={`routinePlus__everydayButton ${
+                        selectedDays.length === ALL_DAY_CODES.length
+                          ? 'routinePlus__everydayButton--selected'
+                          : ''
+                      }`}
+                      aria-pressed={selectedDays.length === ALL_DAY_CODES.length}
+                      onClick={handleEverydayClick}
+                    >
+                      매일
+                    </button>
+                  </div>
+
+                  <div className='routinePlus__dayButtons'>
+                    {DAY_OPTIONS.map((day) => {
+                      const isSelected = selectedDays.includes(day.code)
+
+                      return (
+                        <button
+                          key={day.code}
+                          type='button'
+                          className={`routinePlus__dayButton ${
+                            isSelected ? 'routinePlus__dayButton--selected' : ''
+                          }`}
+                          aria-pressed={isSelected}
+                          onClick={() => handleDayClick(day.code)}
+                        >
+                          {day.label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
 
                 <label className='routinePlus__settingRow'>
                   <span className='routinePlus__settingLabel'>시작 시간</span>
