@@ -4,7 +4,7 @@ import './HomePage.css'
 
 import { getHome, getDailyRoutines } from '../../../api/homeApi'
 import { getCurrentUser } from '../../../api/userApi'
-import { getAvatarImage } from '../../../api/avatarApi'
+import { getAvatarImage, selectAvatarDialogue } from '../../../api/avatarApi'
 
 import ChatBubble from '../../../components/chat-bubble/ChatBubble'
 import HomeBottomSheet from '../component/bottom-sheet/HomeBottomSheet'
@@ -16,9 +16,36 @@ import {
   createTodoCardData,
 } from '../component/bottom-sheet/homeBottomSheetData'
 
+function getDialogueSituation(routines, progress, achievementData) {
+  const isAllCompleted = progress.totalCount > 0 && progress.completedCount === progress.totalCount
+
+  if (isAllCompleted) {
+    return 'ALL_COMPLETED'
+  }
+
+  if (routines.some((routine) => routine.status === 'AVAILABLE')) {
+    return 'ROUTINE_AVAILABLE'
+  }
+
+  if (routines.some((routine) => routine.status === 'UPCOMING')) {
+    return 'ROUTINE_UPCOMING'
+  }
+
+  if (routines.some((routine) => routine.status === 'FAILED')) {
+    return 'ROUTINE_REMINDER'
+  }
+
+  if (achievementData.streak > 0) {
+    return 'STREAK_CONTINUED'
+  }
+
+  return 'RETURN_AFTER_ABSENCE'
+}
+
 function HomePage() {
   const [sheetProgress, setSheetProgress] = useState(0)
   const [isChatVisible, setIsChatVisible] = useState(false)
+  const [isDialogueLoading, setIsDialogueLoading] = useState(false)
   const [chatContent, setChatContent] = useState('')
 
   const [nickname, setNickname] = useState('')
@@ -42,7 +69,6 @@ function HomePage() {
   const avatarHeight = 400 - sheetProgress * 100
   const avatarTranslateY = -sheetProgress * 30
 
-  // 홈 기본 정보 불러오기
   useEffect(() => {
     let isMounted = true
 
@@ -103,7 +129,6 @@ function HomePage() {
     }
   }, [])
 
-  // 실제 아바타 이미지 불러오기
   useEffect(() => {
     let objectUrl = ''
     let isCancelled = false
@@ -132,7 +157,6 @@ function HomePage() {
     }
   }, [])
 
-  // 페이지를 나갈 때 채팅 타이머 정리
   useEffect(() => {
     return () => {
       if (chatTimerRef.current) {
@@ -141,27 +165,36 @@ function HomePage() {
     }
   }, [])
 
-  const dummyMessages = [
-    '오늘도 같이 해볼까요?',
-    '조금만 더 힘내봐요!',
-    '오늘 루틴도 기다리고 있어요.',
-    '꾸준히 하고 있는 거 멋져요!',
-    '저도 점점 건강해지는 것 같아요.',
-  ]
-
-  const handleAvatarClick = () => {
-    const randomIndex = Math.floor(Math.random() * dummyMessages.length)
-
-    setChatContent(dummyMessages[randomIndex])
-    setIsChatVisible(true)
+  const handleAvatarClick = async () => {
+    if (isDialogueLoading) return
 
     if (chatTimerRef.current) {
       clearTimeout(chatTimerRef.current)
     }
 
-    chatTimerRef.current = setTimeout(() => {
-      setIsChatVisible(false)
-    }, 2000)
+    setIsDialogueLoading(true)
+
+    let message = '오늘도 같이 해볼까요?'
+
+    try {
+      const situation = getDialogueSituation(routines, progress, achievementData)
+
+      const dialogue = await selectAvatarDialogue(situation)
+
+      if (dialogue.content) {
+        message = dialogue.content
+      }
+    } catch (error) {
+      console.error('아바타 대사를 불러오지 못했습니다.', error)
+    } finally {
+      setChatContent(message)
+      setIsChatVisible(true)
+      setIsDialogueLoading(false)
+
+      chatTimerRef.current = setTimeout(() => {
+        setIsChatVisible(false)
+      }, 2000)
+    }
   }
 
   return (
@@ -186,6 +219,7 @@ function HomePage() {
           src={avatarImageUrl || dummy}
           className='home__avatar'
           alt='내 아바타'
+          aria-busy={isDialogueLoading}
           onClick={handleAvatarClick}
           style={{
             height: `${avatarHeight}px`,
